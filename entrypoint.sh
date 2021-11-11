@@ -6,7 +6,7 @@ IPTV_WAN_VLAN="${IPTV_WAN_VLAN:-4}"
 IPTV_WAN_VLAN_INTERFACE="${IPTV_WAN_VLAN_INTERFACE:-iptv}"
 IPTV_WAN_DHCP_OPTIONS="${IPTV_WAN_DHCP_OPTIONS:-"-O staticroutes -V IPTV_RG"}"
 IPTV_LAN_INTERFACES="${IPTV_LAN_INTERFACES:-br0}"
-IPTV_LAN_RANGES="${IPTV_LAN_RANGES:-"192.168.0.0/16"}"
+IPTV_LAN_RANGES="${IPTV_LAN_RANGES:-""}"
 
 # Setup the network, creating the IPTV VLAN interface if necessary
 # and obtaining an IP address for the interface.
@@ -26,7 +26,7 @@ iface $IPTV_WAN_VLAN_INTERFACE inet dhcp
     vlan-id $IPTV_WAN_VLAN
     vlan-raw-device $IPTV_WAN_INTERFACE
 EOF
-        ifup "$IPTV_WAN_VLAN_INTERFACE"
+        ifup -f "$IPTV_WAN_VLAN_INTERFACE"
     fi
 
     echo "udm-iptv: NATing IPTV network ranges (if necessary)..."
@@ -39,7 +39,9 @@ EOF
 
 # Build the configuration needed by IGMP Proxy
 _igmpproxy_build_config() {
-    echo "quickleave"
+    if [ -z "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" ]; then
+        echo "quickleave"
+    fi
 
     local target
     if [ "$IPTV_WAN_VLAN" -ne 0 ]; then
