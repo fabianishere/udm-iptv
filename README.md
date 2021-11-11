@@ -151,6 +151,13 @@ After installation, run the IPTV container as follows:
 /mnt/data/on_boot.d/15-iptv.sh
 ```
 
+### Updating
+You can update the IPTV container as follows:
+
+```bash
+podman pull fabianishere/udm-iptv
+```
+
 ### Configuration
 You can modify the configuration of the container after installation in the installed
 boot script at `/mnt/data/on_boot.d/15-iptv.sh`. 
