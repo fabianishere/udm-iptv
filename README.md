@@ -139,9 +139,10 @@ You may also download and inspect the script manually before running it.
 
 Below is a useful list of configuration values for various IPTV providers:
 
-| Provider | WAN VLAN | WAN Ranges | Notes |
-| ---------|---------:|------------|-------|
-| KPN (NL) | 4 | 213.75.0.0/16 217.166.0.0/16 | |
+| Provider     | WAN VLAN | WAN Ranges                   | Notes |
+| -------------|----------|------------------------------|-------|
+| KPN (NL)     | 4        | 213.75.0.0/16 217.166.0.0/16 |       |
+| Telekom (DE) | 0        | 232.0.0.0/16 87.141.0.0/16   | Telekom uses VLAN 7 for both internet and IPTV | 
 
 Feel free to update this list with the configuration of your provider.
 
