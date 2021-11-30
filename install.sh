@@ -217,6 +217,7 @@ _prompt_lan() {
             break
         fi
 
+        LAN_INTERFACES="" # Remove default LAN interface
         error=""
         for interface in $REPLY; do
             if [ "$interface" -eq "$interface" ] 2>/dev/null; then
