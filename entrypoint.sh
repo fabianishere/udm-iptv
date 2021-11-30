@@ -41,7 +41,10 @@ EOF
 
     # NAT the IPTV ranges
     for range in $IPTV_WAN_RANGES; do
-        iptables -C POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target" || iptables -A POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target"
+        # Only add the NAT rule if it does not yet exist
+        if ! iptables -C POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target" >/dev/null 2>&1; then
+            iptables -A POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target"
+        fi
     done
 }
 
