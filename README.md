@@ -36,7 +36,7 @@ For getting IPTV to work on the UniFi Security Gateway, please refer to the
          LAN
           |
       +--------+
-      | Switch |  - Ubiquiti UniFi Switch
+      | Switch |  - Ubiquiti UniFi Switch (Optional)
       +--------+
        |  |  |
        |  |  +-----------------------------+
@@ -206,12 +206,11 @@ Use the following steps to debug `igmpproxy` if it is behaving strangely:
    You can enable `igmpproxy` to report debug messages by adding the following
    flags to the script in `/mnt/data/on_boot.d/15-iptv.sh`:
    ```diff
-      podman run --network=host --privileged \
-        -e IPTV_WAN_INTERFACE="eth8" \
-        -e IPTV_WAN_RANGES="213.75.112.0/21 217.166.0.0/16" \
-        -e IPTV_LAN_INTERFACES="br0" \
-   -    fabianishere/udm-iptv
-   +    fabianishere/udm-iptv -d -v
+        IPTV_WAN_VLAN="4"
+        IPTV_WAN_DHCP_OPTIONS="-O staticroutes -V IPTV_RG"
+        IPTV_LAN_INTERFACES="br0"
+   -    IPTV_IGMPPROXY_ARGS=""
+   +    IPTV_IGMPROXY_ARGS="-d -v"
       ```
    Make sure you run the script afterwards to apply the changes.
 2. **Viewing debug logs**  
@@ -219,6 +218,12 @@ Use the following steps to debug `igmpproxy` if it is behaving strangely:
    ```bash
    podman logs iptv
    ```
+   
+### Reporting an Issue
+Please share the diagnostics reported by the boot script when reporting an issue:
+```bash
+/mnt/data/on_boot.d/15-iptv.sh diagnose
+```
 
 ## Contributing
 Questions, suggestions and contributions are welcome and appreciated!

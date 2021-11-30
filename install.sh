@@ -276,15 +276,45 @@ _show_config() {
 # Create the boot script at the specified location
 _create_config() {
     tee  "$1" <<EOF >/dev/null
+## IPTV Configuration
 IPTV_WAN_INTERFACE="$WAN_INTERFACE"
 IPTV_WAN_RANGES="$WAN_RANGES"
 IPTV_WAN_VLAN="$WAN_VLAN"
 IPTV_WAN_DHCP_OPTIONS="-O staticroutes -V IPTV_RG"
 IPTV_LAN_INTERFACES="$LAN_INTERFACES"
+IPTV_IGMPPROXY_ARGS=""
 
-if podman container exists iptv; then
-  podman rm -f iptv
+## Diagnostics
+if [ "\$1" == "diagnose" ]; then
+    if [ "\$IPTV_WAN_VLAN" -ne 0 ]; then
+        target="iptv"
+    else
+        target="\$IPTV_WAN_INTERFACE"
+    fi
+
+    echo "Please share the following output width the developers:"
+    echo "=== Configuration ==="
+    echo "WAN Interface: \$IPTV_WAN_INTERFACE"
+    echo "WAN Ranges: \$IPTV_WAN_RANGES"
+    echo "WAN VLAN: \$IPTV_WAN_VLAN"
+    echo "LAN Interfaces: \$IPTV_LAN_INTERFACES"
+
+    echo "=== IP Link and Route ==="
+    ip -4 addr show dev \$target
+    ip route show dev \$target
+
+    echo "=== Container Logs ==="
+    podman logs iptv | tail
+
+    exit
 fi
+
+## Boot script
+if podman container exists iptv; then
+  echo "Removing existing IPTV container..."
+  podman rm -f iptv > /dev/null 2>&1
+fi
+
 podman run --network=host --privileged \\
     --name iptv -i -d --restart on-failure:5 \\
     -e IPTV_WAN_INTERFACE="\$IPTV_WAN_INTERFACE" \\
@@ -293,7 +323,13 @@ podman run --network=host --privileged \\
     -e IPTV_WAN_DHCP_OPTIONS="\$IPTV_WAN_DHCP_OPTIONS" \\
     -e IPTV_LAN_INTERFACES="\$IPTV_LAN_INTERFACES" \\
     -e IPTV_LAN_RANGES="" \\
-    fabianishere/udm-iptv
+    fabianishere/udm-iptv \$IPTV_IGMPPROXY_ARGS > /tmp/udm-iptv.txt 2>&1
+res="\$?"
+if [ "\$res" -ne 0 ]; then
+    echo "Failed to launch IPTV container: error \$res."
+    echo "See /tmp/udm-iptv.txt for the error log."
+fi
+exit \$res
 EOF
     chmod +x /mnt/data/on_boot.d/15-iptv.sh
 }
