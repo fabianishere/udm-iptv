@@ -26,6 +26,14 @@ iface $IPTV_WAN_VLAN_INTERFACE inet dhcp
     vlan-id $IPTV_WAN_VLAN
     vlan-raw-device $IPTV_WAN_INTERFACE
 EOF
+
+        # Do not update /etc/resolv.conf
+        mkdir -p /etc/udhcpc
+        tee /etc/udhcpc/udhcpc.conf <<EOF >/dev/null
+RESOLV_CONF=no
+EOF
+
+        # Start VLAN interface
         ifup -f "$IPTV_WAN_VLAN_INTERFACE"
     fi
 
