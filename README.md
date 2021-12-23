@@ -55,12 +55,12 @@ For getting IPTV to work on the UniFi Security Gateway, please refer to the
 Make sure you check the following prerequisites before trying the other steps:
 
 1. The kernel on your UniFi Dream Machine (Pro) must support multicast routing
-   in order to support IPTV. The stock UDM/P kernel starting from
-   [firmware version 1.11](https://community.ui.com/releases/UniFi-OS-Dream-Machines-1-11-0-14/71916646-d8f6-41c0-b145-2fbe2db7c278)
-   now support multicast routing natively.
-   If you cannot use the latest firmware version, see [udm-kernel](https://github.com/fabianishere/udm-kernel)
-   for a kernel that supports multicast routing for older firmware versions of
-   the UDM/P.
+   in order to support IPTV.
+   Multicast routing is supported natively by the stock kernel from
+   [firmware version 1.11](https://community.ui.com/releases/UniFi-OS-Dream-Machines-1-11-0/eef95803-6976-499b-9169-bf6dfbbcc209)
+   and later.
+   If you for some reason cannot use firmware v1.11+, see [udm-kernel](https://github.com/fabianishere/udm-kernel)
+   for a kernel that supports multicast routing for older firmware versions of the UDM/P.
 2. You must
    have [on-boot-script](https://github.com/boostchicken/udm-utilities/tree/master/on-boot-script)
    installed on your UDM/P.
