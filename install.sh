@@ -292,7 +292,7 @@ if [ "\$1" == "diagnose" ]; then
         target="\$IPTV_WAN_INTERFACE"
     fi
 
-    echo "Please share the following output width the developers:"
+    echo "Please share the following output with the developers:"
     echo "=== Configuration ==="
     echo "WAN Interface: \$IPTV_WAN_INTERFACE"
     echo "WAN Ranges: \$IPTV_WAN_RANGES"
