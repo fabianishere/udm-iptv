@@ -83,10 +83,8 @@ If you are a customer of KPN, you can set up the WAN connection as follows:
 3. Enable **VLAN ID** and set it to the Internet VLAN of your ISP (VLAN6 for
    KPN).
 4. Set **IPv4 Connection** to _PPPoE_.
-5. For KPN, **Username** should be set to `xx-xx-xx-xx-xx-xx@internet` where
-   the `xx-xx-xx-xx-xx-xx` is replaced by the MAC address of your modem, with
-   the semicolons (":") replaced with dashes ("-").
-6. For KPN, **Password** should be set to `ppp`.
+5. For KPN, **Username** should be set to `internet`.
+6. For KPN, **Password** should be set to `internet`.
 
 ## Configuring Internal LAN
 
