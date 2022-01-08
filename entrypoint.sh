@@ -15,29 +15,32 @@ _network_setup() {
     target="$IPTV_WAN_INTERFACE"
 
     # Make sure we obtain IP address for VLAN interface
-    if [ "$IPTV_WAN_VLAN" -ne 0 ]; then
-        echo "udm-iptv: Obtaining IP address for VLAN interface..."
+    if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
+        echo "Obtaining IP address for VLAN interface"
 
         target="$IPTV_WAN_VLAN_INTERFACE"
-        tee /etc/network/interfaces <<EOF >/dev/null
-auto $IPTV_WAN_VLAN_INTERFACE
-iface $IPTV_WAN_VLAN_INTERFACE inet dhcp
-    udhcpc_opts $IPTV_WAN_DHCP_OPTIONS
-    vlan-id $IPTV_WAN_VLAN
-    vlan-raw-device $IPTV_WAN_INTERFACE
-EOF
 
-        # Do not update /etc/resolv.conf
-        mkdir -p /etc/udhcpc
-        tee /etc/udhcpc/udhcpc.conf <<EOF >/dev/null
-RESOLV_CONF=no
-EOF
+        # Create VLAN interface (if it does not exist)
+        if [ -e /sys/class/net/"$IPTV_WAN_VLAN_INTERFACE" ]; then
+            echo "Device $IPTV_WAN_VLAN_INTERFACE already exists"
+        elif ! ip link show "$IPTV_WAN_INTERFACE" >/dev/null; then
+            echo "Device $IPTV_WAN_INTERFACE for $IPTV_WAN_VLAN_INTERFACE does not exist"
+            exit 1
+        else
+            ip link add link "$IPTV_WAN_INTERFACE" name "$IPTV_WAN_VLAN_INTERFACE" type vlan id "$IPTV_WAN_VLAN"
+        fi
 
-        # Start VLAN interface
-        ifup -f "$IPTV_WAN_VLAN_INTERFACE"
+        # Bring VLAN interface up
+        ip link set dev "$IPTV_WAN_VLAN_INTERFACE" up
+
+         # Do not update /etc/resolv.conf
+        export RESOLV_CONF=no
+
+        # Obtain IP address for VLAN interface
+        udhcpc -b -R -p /var/run/udhcpc."$IPTV_WAN_VLAN_INTERFACE".pid -i "$IPTV_WAN_VLAN_INTERFACE" $IPTV_WAN_DHCP_OPTIONS
     fi
 
-    echo "udm-iptv: NATing IPTV network ranges (if necessary)..."
+    echo "NATing IPTV network ranges (if necessary)"
 
     # NAT the IPTV ranges
     for range in $IPTV_WAN_RANGES; do
@@ -80,12 +83,12 @@ _igmpproxy_build_config() {
 
 # Configure IGMP Proxy to bridge multicast traffic
 _igmpproxy_setup() {
-    echo "udm-iptv: Setting up igmpproxy.."
+    echo "Setting up igmpproxy"
     _igmpproxy_build_config >/etc/igmpproxy.conf
 }
 
 _network_setup
 _igmpproxy_setup
 
-echo "udm-iptv: Starting igmpproxy.."
+echo "Starting igmpproxy"
 exec igmpproxy -n "$@" /etc/igmpproxy.conf
