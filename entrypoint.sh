@@ -33,11 +33,8 @@ _network_setup() {
         # Bring VLAN interface up
         ip link set dev "$IPTV_WAN_VLAN_INTERFACE" up
 
-         # Do not update /etc/resolv.conf
-        export RESOLV_CONF=no
-
         # Obtain IP address for VLAN interface
-        udhcpc -b -R -p /var/run/udhcpc."$IPTV_WAN_VLAN_INTERFACE".pid -i "$IPTV_WAN_VLAN_INTERFACE" $IPTV_WAN_DHCP_OPTIONS
+        busybox udhcpc -b -R -p /var/run/udhcpc."$IPTV_WAN_VLAN_INTERFACE".pid -s udhcpc.hook.sh -i "$IPTV_WAN_VLAN_INTERFACE" $IPTV_WAN_DHCP_OPTIONS
     fi
 
     echo "NATing IPTV network ranges (if necessary)"
