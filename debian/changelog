@@ -1,0 +1,6 @@
+udm-iptv (2.0.0) stable; urgency=medium
+
+  * Initial release of udm-iptv as Debian package.
+  * Add support for UDM Pro SE and UDR.
+
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Sat, 8 Jan 2022 12:00:00 +0100

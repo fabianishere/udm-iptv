@@ -1,0 +1,5 @@
+README.md usr/share/doc/udm-iptv
+debian/copyright usr/share/doc/udm-iptv
+udm-iptv usr/lib/udm-iptv
+udhcpc.hook usr/lib/udm-iptv
+udm-iptv.conf etc

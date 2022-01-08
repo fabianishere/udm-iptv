@@ -1,12 +1,12 @@
-#!/bin/ash
-
-IPTV_WAN_INTERFACE="${IPTV_WAN_INTERFACE:-eth8}"
-IPTV_WAN_RANGES="${IPTV_WAN_RANGES:-"213.75.0.0/16 217.166.0.0/16"}"
-IPTV_WAN_VLAN="${IPTV_WAN_VLAN:-4}"
-IPTV_WAN_VLAN_INTERFACE="${IPTV_WAN_VLAN_INTERFACE:-iptv}"
-IPTV_WAN_DHCP_OPTIONS="${IPTV_WAN_DHCP_OPTIONS:-"-O staticroutes -V IPTV_RG"}"
-IPTV_LAN_INTERFACES="${IPTV_LAN_INTERFACES:-br0}"
-IPTV_LAN_RANGES="${IPTV_LAN_RANGES:-""}"
+#!/bin/sh
+# Script for managing the udm-iptv service
+#
+# Copyright (C) 2021 Fabian Mastenbroek.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 
 # Setup the network, creating the IPTV VLAN interface if necessary
 # and obtaining an IP address for the interface.
@@ -16,8 +16,6 @@ _network_setup() {
 
     # Make sure we obtain IP address for VLAN interface
     if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
-        echo "Obtaining IP address for VLAN interface"
-
         target="$IPTV_WAN_VLAN_INTERFACE"
 
         # Create VLAN interface (if it does not exist)
@@ -33,8 +31,10 @@ _network_setup() {
         # Bring VLAN interface up
         ip link set dev "$IPTV_WAN_VLAN_INTERFACE" up
 
+        echo "Obtaining IP address for VLAN interface"
+
         # Obtain IP address for VLAN interface
-        busybox udhcpc -b -R -p /var/run/udhcpc."$IPTV_WAN_VLAN_INTERFACE".pid -s udhcpc.hook.sh -i "$IPTV_WAN_VLAN_INTERFACE" $IPTV_WAN_DHCP_OPTIONS
+        busybox udhcpc -b -R -p /var/run/udhcpc."$IPTV_WAN_VLAN_INTERFACE".pid -s "$(dirname "$0")"/udhcpc.hook -i "$IPTV_WAN_VLAN_INTERFACE" $IPTV_WAN_DHCP_OPTIONS
     fi
 
     echo "NATing IPTV network ranges (if necessary)"
@@ -45,6 +45,14 @@ _network_setup() {
         if ! iptables -C POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target" >/dev/null 2>&1; then
             iptables -A POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target"
         fi
+    done
+}
+
+# Tear down the network configuration
+_network_teardown() {
+    # Delete the IPTables rules
+    for range in $IPTV_WAN_RANGES; do
+        iptables -D POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target" >/dev/null 2>&1
     done
 }
 
@@ -85,8 +93,31 @@ _igmpproxy_setup() {
     _igmpproxy_build_config >/var/run/igmpproxy.iptv.conf
 }
 
-_network_setup
-_igmpproxy_setup
+# Tear down the IGMP Proxy configuration
+_igmpproxy_teardown() {
+    rm -f /var/run/igmpproxy.iptv.conf
+}
 
-echo "Starting igmpproxy"
-exec igmpproxy -n "$@" /var/run/igmpproxy.iptv.conf
+# Check if the user passed any argument
+if [ $# -eq 0 ]; then
+    exit 1
+fi
+
+case $1 in
+    start)
+        shift
+        _network_setup
+        _igmpproxy_setup
+
+        echo "Starting igmpproxy"
+        exec igmpproxy -n "$@" /var/run/igmpproxy.iptv.conf
+        ;;
+    stop)
+        shift
+        _network_teardown
+        _igmpproxy_teardown
+        ;;
+    *)
+        exit 1
+        ;;
+esac
