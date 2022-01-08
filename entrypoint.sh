@@ -53,12 +53,13 @@ _network_setup() {
 
 # Build the configuration needed by IGMP Proxy
 _igmpproxy_build_config() {
+    echo "# igmpproxy configuration for udm-iptv"
     if [ -z "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" ]; then
         echo "quickleave"
     fi
 
     local target
-    if [ "$IPTV_WAN_VLAN" -ne 0 ]; then
+    if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
         target="$IPTV_WAN_VLAN_INTERFACE"
     else
         target="$IPTV_WAN_INTERFACE"
@@ -84,11 +85,11 @@ _igmpproxy_build_config() {
 # Configure IGMP Proxy to bridge multicast traffic
 _igmpproxy_setup() {
     echo "Setting up igmpproxy"
-    _igmpproxy_build_config >/etc/igmpproxy.conf
+    _igmpproxy_build_config >/var/run/igmpproxy.iptv.conf
 }
 
 _network_setup
 _igmpproxy_setup
 
 echo "Starting igmpproxy"
-exec igmpproxy -n "$@" /etc/igmpproxy.conf
+exec igmpproxy -n "$@" /var/run/igmpproxy.iptv.conf
