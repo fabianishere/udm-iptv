@@ -226,11 +226,17 @@ Make sure you are running inside UniFi OS.
    journalctl -u udm-iptv
    ```
 
+### Reporting an Issue
+Please share the diagnostics reported by the service when reporting an issue:
+```bash
+udm-iptv-diag
+```
+
 ## Contributing
 Questions, suggestions and contributions are welcome and appreciated!
 You can contribute in various meaningful ways:
 
-* Report a bug through [Github issues](https://github.com/fabianishere/udm-iptv/issues).
+* Report a bug through [GitHub issues](https://github.com/fabianishere/udm-iptv/issues).
 * Contribute improvements to the documentation (e.g., configuration for other ISPs).
 * Help answer questions on our [Discussions](https://github.com/fabianishere/udm-iptv/discussions) page.
 
