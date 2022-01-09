@@ -142,6 +142,7 @@ Below is a useful list of configuration values for various IPTV providers:
 | KPN (NL)     | 4        | 213.75.0.0/16 217.166.0.0/16 |       |
 | Telekom (DE) | 0        | 232.0.0.0/16 87.141.0.0/16   | Telekom uses VLAN 7 for both internet and IPTV |
 | Swisscom (CH)| 0        | 213.3.72.0/24 224.0.0.0/4 |       |
+| Init7 (CH)| 0        | 224.0.0.0/8 239.0.0.0/8 |       |
 
 Feel free to update this list with the configuration of your provider.
 
