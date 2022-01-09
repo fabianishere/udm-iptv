@@ -1,0 +1,52 @@
+Template: udm-iptv/wan-port
+Description: Port through which IPTV traffic enters the router:
+Type: select
+Choices: ${choices}
+Choices-C: ${choices_c}
+
+Template: udm-iptv/wan-interface
+Description: Interface on which IPTV traffic enters the router:
+Type: select
+Choices: ${choices}
+
+Template: udm-iptv/wan-vlan-separate
+Description: Is IPTV traffic carried over a separate VLAN?
+Type: boolean
+Default: true
+
+Template: udm-iptv/wan-vlan
+Description: ID of VLAN which carries IPTV traffic:
+Type: string
+Default: 4
+
+Template: udm-iptv/wan-vlan-interface
+Description: Name of the IPTV VLAN interface:
+Type: string
+Default: iptv
+
+Template: udm-iptv/wan-ranges
+Description: IP ranges from which the IPTV traffic originates:
+Type: string
+Default: 213.75.0.0/16, 217.166.0.0/16
+
+Template: udm-iptv/wan-dhcp-options
+Description: DHCP options to send when requesting an IP address:
+Type: string
+Default: -O staticroutes -V IPTV_RG
+
+Template: udm-iptv/lan-interfaces
+Description: LAN interfaces on which IPTV should be made available:
+Type: multiselect
+Choices: ${choices}
+Choices-C: ${choices_c}
+Default: br0
+
+Template: udm-iptv/igmpproxy-quickleave
+Description: Enable quickleave for igmpproxy?
+Type: boolean
+Default: true
+
+Template: udm-iptv/igmpproxy-debug
+Description: Enable igmpproxy debugging?
+Type: boolean
+Default: false

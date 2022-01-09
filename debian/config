@@ -1,0 +1,134 @@
+#!/bin/sh -e
+# Copyright (C) 2022 Fabian Mastenbroek.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
+# Helper function to obtain IP address of interface
+_if_inet_addr() {
+    ip addr show dev "$1" | awk '$1 == "inet" { sub("/.*", "", $2); print $2 }'
+}
+
+# Helper function to list interfaces
+_if_inet_list() {
+    for interface in $(find /sys/class/net -name "br*" -exec basename {} \; | sort); do
+        id=$(echo "$interface" | sed -n 's/br\(.*\)/\1/p')
+        type="LAN"
+        if [ "$id" -gt 0 ]; then
+            type="VLAN $id"
+        fi
+        printf "%-9s [IPv4: %s]\n" "$type" "$(_if_inet_addr "$interface")"
+    done
+}
+
+# Helper function to list all slave interface of some interface
+_if_inet_list_slaves() {
+    basename "$(readlink "$1")"
+    for path in "$1"/upper_*; do
+        [ -e "$path" ] || continue
+        _if_inet_list_slaves "$path"
+    done
+}
+
+# Obtain the board name of the device running the installation script
+if [ -e /etc/board.info ] && grep -q "board.shortname" /etc/board.info; then
+    board=$(sed -n 's/^board.shortname=\s*\(.*\)\s*/\1/p' /etc/board.info)
+elif [ -e /proc/ubnthal/system.info ] && grep -q "shortname" /proc/ubnthal/system.info; then
+    board=$(sed -n 's/shortname=\s*\(.*\)\s*/\1/p' /proc/ubnthal/system.info)
+else
+    board=""
+fi
+
+db_version 2.0
+db_capb backup
+db_capb escape
+
+# facilitate backup capability per debconf-devel(7)
+STATE=1
+while true; do
+    case "$STATE" in
+    0)  # ensure going back from initial step is harmless
+        STATE=1
+        continue
+        ;;
+    1)  # Configure WAN interface
+        case "$board" in
+            UDMPRO|UDMPROSE)
+                db_subst udm-iptv/wan-port choices "WAN 1 (RJ45), WAN 2 (SFP+)"
+                db_subst udm-iptv/wan-port choices_c "eth8, eth9"
+                db_set udm-iptv/wan-port eth8
+                db_input high udm-iptv/wan-port || true
+                ;;
+            UDM|UDMSE|UDR)
+                db_set udm-iptv/wan-port eth4
+                ;;
+            *)
+                db_set udm-iptv/wan-port eth8
+                ;;
+        esac
+        ;;
+    2)  # Ask whether IPTV traffic is carried over separate VLAN
+        db_input high udm-iptv/wan-vlan-separate || true
+        ;;
+    3)  # If IPTV traffic is carried over a separate VLAN, ask which ID
+        db_get udm-iptv/wan-vlan-separate
+        if [ "$RET" = false ]; then
+            # IPTV traffic is on native VLAN
+            db_set udm-iptv/wan-vlan 0
+
+            db_get udm-iptv/wan-port
+            db_subst udm-iptv/wan-interface choices "$(_if_inet_list_slaves "/sys/class/net/$RET" | sed ':a;N;s/\n/, /;ba')"
+            db_input high udm-iptv/wan-interface || true
+        else
+            # WAN port is same as WAN interface
+            db_get udm-iptv/wan-port
+            db_set udm-iptv/wan-interface "$RET"
+
+            # Configure VLAN ID
+            db_set udm-iptv/wan-vlan 4
+            db_input high udm-iptv/wan-vlan || true
+        fi
+        ;;
+    4)  # Configure VLAN interface name
+        db_input low udm-iptv/wan-vlan-interface || true
+        ;;
+    5)  # Configure WAN ranges
+        db_input high udm-iptv/wan-ranges || true
+        ;;
+    6)  # Configure DHCP options
+        db_input high udm-iptv/wan-dhcp-options || true
+        ;;
+    7)  # Select LAN interfaces
+        db_subst udm-iptv/lan-interfaces choices "$(_if_inet_list | sed ':a;N;s/\n/, /;ba')"
+        db_subst udm-iptv/lan-interfaces choices_c "$(find /sys/class/net -name "br*" -exec basename {} \; | sort | sed ':a;N;s/\n/, /;ba')"
+        db_input high udm-iptv/lan-interfaces || true
+        ;;
+    8)  # Configure igmpproxy
+        db_beginblock
+        db_input low udm-iptv/igmpproxy-quickleave || true
+        db_input low udm-iptv/igmpproxy-debug || true
+        db_endblock
+        ;;
+    9)  # Complete configuration
+        exit 0
+        ;;
+    *)  # unknown state
+        echo "Unknown configuration state: $STATE" >&2
+        exit 2
+        ;;
+    esac
+    if db_go; then
+        STATE=$(($STATE + 1))
+    else
+        STATE=$(($STATE - 1))
+    fi
+done
+
+#DEBHELPER#
+
+db_stop

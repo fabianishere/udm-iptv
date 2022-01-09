@@ -8,6 +8,11 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
+# Default options
+IPTV_WAN_VLAN_INTERFACE="${IPTV_WAN_VLAN_INTERFACE:-iptv}"
+IPTV_WAN_DHCP_OPTIONS="${IPTV_WAN_DHCP_OPTIONS:-"-O staticroutes -V IPTV_RG"}"
+IPTV_LAN_RANGES="${IPTV_LAN_RANGES:-""}"
+
 # Setup the network, creating the IPTV VLAN interface if necessary
 # and obtaining an IP address for the interface.
 _network_setup() {
@@ -59,7 +64,7 @@ _network_teardown() {
 # Build the configuration needed by IGMP Proxy
 _igmpproxy_build_config() {
     echo "# igmpproxy configuration for udm-iptv"
-    if [ -z "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" ]; then
+    if [ -z "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" ] || [ "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" = "false" ]; then
         echo "quickleave"
     fi
 
@@ -98,6 +103,17 @@ _igmpproxy_teardown() {
     rm -f /var/run/igmpproxy.iptv.conf
 }
 
+# Start the igmpproxy service
+_igmpproxy_start() {
+    echo "Starting igmpproxy"
+    args=""
+    if [ -n "$IPTV_IGMPPROXY_DEBUG" ] && [ "$IPTV_IGMPPROXY_DEBUG" != "false" ]; then
+        args="-d -v"
+    fi
+    # shellcheck disable=SC2086
+    exec igmpproxy -n $args "$@" /var/run/igmpproxy.iptv.conf
+}
+
 # Check if the user passed any argument
 if [ $# -eq 0 ]; then
     exit 1
@@ -108,9 +124,7 @@ case $1 in
         shift
         _network_setup
         _igmpproxy_setup
-
-        echo "Starting igmpproxy"
-        exec igmpproxy -n "$@" /var/run/igmpproxy.iptv.conf
+        _igmpproxy_start "$@"
         ;;
     stop)
         shift
