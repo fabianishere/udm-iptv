@@ -1,0 +1,12 @@
+[Unit]
+Description=IPTV support for the UniFi Dream Machine
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/udm-iptv.conf
+ExecStart=/usr/lib/udm-iptv/udm-iptv start
+ExecStop=/usr/lib/udm-iptv/udm-iptv stop
+
+[Install]
+WantedBy=multi-user.target

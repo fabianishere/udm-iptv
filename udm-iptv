@@ -1,0 +1,137 @@
+#!/bin/sh
+# Script for managing the udm-iptv service
+#
+# Copyright (C) 2021 Fabian Mastenbroek.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+# Default options
+IPTV_WAN_VLAN_INTERFACE="${IPTV_WAN_VLAN_INTERFACE:-iptv}"
+IPTV_WAN_DHCP_OPTIONS="${IPTV_WAN_DHCP_OPTIONS:-"-O staticroutes -V IPTV_RG"}"
+IPTV_LAN_RANGES="${IPTV_LAN_RANGES:-""}"
+
+# Setup the network, creating the IPTV VLAN interface if necessary
+# and obtaining an IP address for the interface.
+_network_setup() {
+    local target
+    target="$IPTV_WAN_INTERFACE"
+
+    # Make sure we obtain IP address for VLAN interface
+    if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
+        target="$IPTV_WAN_VLAN_INTERFACE"
+
+        # Create VLAN interface (if it does not exist)
+        if [ -e /sys/class/net/"$IPTV_WAN_VLAN_INTERFACE" ]; then
+            echo "Device $IPTV_WAN_VLAN_INTERFACE already exists"
+        elif ! ip link show "$IPTV_WAN_INTERFACE" >/dev/null; then
+            echo "Device $IPTV_WAN_INTERFACE for $IPTV_WAN_VLAN_INTERFACE does not exist"
+            exit 1
+        else
+            ip link add link "$IPTV_WAN_INTERFACE" name "$IPTV_WAN_VLAN_INTERFACE" type vlan id "$IPTV_WAN_VLAN"
+        fi
+
+        # Bring VLAN interface up
+        ip link set dev "$IPTV_WAN_VLAN_INTERFACE" up
+
+        echo "Obtaining IP address for VLAN interface"
+
+        # Obtain IP address for VLAN interface
+        busybox udhcpc -b -R -p /var/run/udhcpc."$IPTV_WAN_VLAN_INTERFACE".pid -s "$(dirname "$0")"/udhcpc.hook -i "$IPTV_WAN_VLAN_INTERFACE" $IPTV_WAN_DHCP_OPTIONS
+    fi
+
+    echo "NATing IPTV network ranges (if necessary)"
+
+    # NAT the IPTV ranges
+    for range in $IPTV_WAN_RANGES; do
+        # Only add the NAT rule if it does not yet exist
+        if ! iptables -C POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target" >/dev/null 2>&1; then
+            iptables -A POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target"
+        fi
+    done
+}
+
+# Tear down the network configuration
+_network_teardown() {
+    # Delete the IPTables rules
+    for range in $IPTV_WAN_RANGES; do
+        iptables -D POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target" >/dev/null 2>&1
+    done
+}
+
+# Build the configuration needed by IGMP Proxy
+_igmpproxy_build_config() {
+    echo "# igmpproxy configuration for udm-iptv"
+    if [ -z "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" ] || [ "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" = "false" ]; then
+        echo "quickleave"
+    fi
+
+    local target
+    if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
+        target="$IPTV_WAN_VLAN_INTERFACE"
+    else
+        target="$IPTV_WAN_INTERFACE"
+    fi
+
+    echo "phyint $target upstream  ratelimit 0  threshold 1"
+    for range in $IPTV_LAN_RANGES $IPTV_WAN_RANGES; do
+        echo "  altnet $range"
+    done
+
+    # Configure the igmpproxy interfaces
+    for path in /sys/class/net/*; do
+        local interface
+        interface=$(basename "$path")
+        if echo "$IPTV_LAN_INTERFACES" | grep -w -q "$interface"; then
+            echo "phyint $interface downstream  ratelimit 0  threshold 1"
+        elif [ "$interface" != "lo" ] && [ "$interface" != "$target" ]; then
+            echo "phyint $interface disabled"
+        fi
+    done
+}
+
+# Configure IGMP Proxy to bridge multicast traffic
+_igmpproxy_setup() {
+    echo "Setting up igmpproxy"
+    _igmpproxy_build_config >/var/run/igmpproxy.iptv.conf
+}
+
+# Tear down the IGMP Proxy configuration
+_igmpproxy_teardown() {
+    rm -f /var/run/igmpproxy.iptv.conf
+}
+
+# Start the igmpproxy service
+_igmpproxy_start() {
+    echo "Starting igmpproxy"
+    args=""
+    if [ -n "$IPTV_IGMPPROXY_DEBUG" ] && [ "$IPTV_IGMPPROXY_DEBUG" != "false" ]; then
+        args="-d -v"
+    fi
+    # shellcheck disable=SC2086
+    exec igmpproxy -n $args "$@" /var/run/igmpproxy.iptv.conf
+}
+
+# Check if the user passed any argument
+if [ $# -eq 0 ]; then
+    exit 1
+fi
+
+case $1 in
+    start)
+        shift
+        _network_setup
+        _igmpproxy_setup
+        _igmpproxy_start "$@"
+        ;;
+    stop)
+        shift
+        _network_teardown
+        _igmpproxy_teardown
+        ;;
+    *)
+        exit 1
+        ;;
+esac

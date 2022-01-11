@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    name: Build
+    runs-on: [ubuntu-18.04]
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v2
+        with:
+          path: udm-kernel-tools
+          submodules: recursive
+      - name: Setup Dependencies
+        run: sudo apt-get install devscripts debhelper
+      - name: Build Package
+        run: |
+          cd udm-iptv
+          debuild -uc -us --lintian-opts --profile debian
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifacts
+          if-no-files-found: error
+          path: |
+            *.deb
+            *.build*
+            *.changes
+            *.dsc
+  release:
+    name: Publish Release
+    runs-on: [ubuntu-18.04]
+    needs: build
+    steps:
+      - name: Checkout Sources
+        uses: actions/checkout@v2
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+          path: build-artifacts
+      - name: Format Release Name
+        id: format_release
+        run: |
+          ref="${{ github.ref}}"
+          release_name=${ref#"refs/tags/"}
+          echo "::set-output name=release::$release_name"
+          changelog=$(dpkg-parsechangelog -c 1 -l debian/changelog)
+          changelog="${changelog//'%'/'%25'}"
+          changelog="${changelog//$'\n'/'%0A'}"
+          changelog="${changelog//$'\r'/'%0D'}"
+          echo "::set-output name=changelog::$changelog"
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: udm-kernel-tools ${{ steps.format_release.outputs.release }}
+          body: ${{ steps.format_release.outputs.changelog }}
+          files: build-artifacts/udm-iptv_*.deb

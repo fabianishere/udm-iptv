@@ -1,0 +1,18 @@
+Source: udm-iptv
+Section: utils
+Priority: optional
+Maintainer: Fabian Mastenbroek <mail.fabianm@gmail.com>
+Build-Depends: debhelper (>= 11)
+Standards-Version: 4.1.4
+Vcs-Git: https://github.com/fabianishere/udm-iptv.git
+Vcs-Browser: https://github.com/fabianishere/udm-iptv.git
+Homepage: https://github.com/fabianishere/udm-iptv
+
+Package: udm-iptv
+Architecture: all
+Depends: busybox | busybox-static, iptables, igmpproxy (>= 0.2), ${misc:Depends}
+Section: net
+Priority: optional
+Description: Helper tool for configuring IPTV on the UniFi Dream Machine (Pro)
+ This package provides a tool for configuring IPTV on the UniFi Dream Machine
+ and UniFi Dream Machine Pro from Ubiquiti.

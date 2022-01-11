@@ -1,0 +1,64 @@
+#!/bin/sh -e
+# Copyright (C) 2022 Fabian Mastenbroek.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
+# Substitute a debconf answer into a configuration file with the syntax of
+# /etc/udm-iptv.conf
+replace_conf() {
+    file="$1"
+    setting="$2"
+    value="$3";
+    if grep -q "^${setting}=" "$file"; then
+        value="$(echo "$value" | sed -e 's,[\@],\\&,g')"
+        sed -i -re "s@^(${setting}=).*@\1\"${value}\"@" "$file"
+    else
+        echo >> "$file"
+        echo "${setting}=\"${value}\"" >> "$file"
+    fi
+}
+
+tmpconf=$(mktemp -t iptv.XXXX.conf)
+# Copy original configuration into temp file
+cp /etc/udm-iptv.conf "$tmpconf" || true
+
+db_get udm-iptv/wan-interface
+replace_conf "$tmpconf" "IPTV_WAN_INTERFACE" "$RET"
+
+db_get udm-iptv/wan-vlan
+replace_conf "$tmpconf" "IPTV_WAN_VLAN" "$RET"
+
+db_get udm-iptv/wan-vlan-interface
+replace_conf "$tmpconf" "IPTV_WAN_VLAN_INTERFACE" "$RET"
+
+db_get udm-iptv/wan-ranges
+replace_conf "$tmpconf" "IPTV_WAN_RANGES" "$(echo "$RET" | tr ',' ' ')"
+
+db_get udm-iptv/wan-dhcp-options
+replace_conf "$tmpconf" "IPTV_WAN_DHCP_OPTIONS" "$RET"
+
+db_get udm-iptv/lan-interfaces
+replace_conf "$tmpconf" "IPTV_LAN_INTERFACES" "$(echo "$RET" | tr ',' ' ')"
+
+db_get udm-iptv/igmpproxy-quickleave
+value="false"
+if [ "$RET" = "false" ]; then
+    value="true"
+fi
+replace_conf "$tmpconf" "IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" "$value"
+
+db_get udm-iptv/igmpproxy-debug
+replace_conf "$tmpconf" "IPTV_IGMPPROXY_DEBUG" "$RET"
+
+# Replace file with updated configuration
+mv "$tmpconf" /etc/udm-iptv.conf
+
+#DEBHELPER#
+
+exit 0
