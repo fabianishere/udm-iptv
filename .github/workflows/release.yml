@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Sources
         uses: actions/checkout@v2
         with:
-          path: udm-kernel-tools
+          path: udm-iptv
           submodules: recursive
       - name: Setup Dependencies
         run: sudo apt-get install devscripts debhelper
@@ -59,6 +59,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: udm-kernel-tools ${{ steps.format_release.outputs.release }}
+          name: udm-iptv ${{ steps.format_release.outputs.release }}
           body: ${{ steps.format_release.outputs.changelog }}
           files: build-artifacts/udm-iptv_*.deb
