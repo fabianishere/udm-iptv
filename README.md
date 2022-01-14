@@ -141,12 +141,12 @@ This script will install the `udm-iptv` package onto your device.
 The installation process prompts the user with various questions to correctly
 configure the package. Below is a useful list of configuration values for various IPTV providers:
 
-| Provider      | WAN VLAN | WAN Ranges                                                            | Notes                                            |
-|---------------|:--------:|-----------------------------------------------------------------------|--------------------------------------------------|
-| KPN (NL)      |    4     | 213.75.0.0/16 217.166.0.0/16                                          | DHCP options set to `-O staticroutes -V IPTV_RG` |
+| Provider      | WAN VLAN | WAN Ranges                                                             | Notes                                            |
+|---------------|:--------:|------------------------------------------------------------------------|--------------------------------------------------|
+| KPN (NL)      |    4     | 213.75.0.0/16 217.166.0.0/16                                           | DHCP options set to `-O staticroutes -V IPTV_RG` |
  | Tweak (NL)    |    4     | 239.0.3.0/16 225.0.71.0/24 224.0.0.0/16                               |                                                  |
  | Telekom (DE)  |    0     | 232.0.0.0/16 87.141.0.0/16                                            | Telekom uses VLAN 7 for both internet and IPTV   |
- | Swisscom (CH) |    0     | 213.3.72.0/24 224.0.0.0/4                                             |                                                  |
+ | Swisscom (CH) |    0     | 195.186.0.0/16 213.3.72.0/24 224.0.0.0/4                              |                                                  |
  | Init7 (CH)    |    0     | 224.0.0.0/8 239.0.0.0/8                                               |                                                  |
  | MEO (PT)      |    0     | 10.159.0.0/16 10.173.0.0/16 194.65.46.0/23 213.13.16.0/20 224.0.0.0/4 |
 
