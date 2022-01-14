@@ -13,6 +13,16 @@ IPTV_WAN_VLAN_INTERFACE="${IPTV_WAN_VLAN_INTERFACE:-iptv}"
 IPTV_WAN_DHCP_OPTIONS="${IPTV_WAN_DHCP_OPTIONS:-"-O staticroutes -V IPTV_RG"}"
 IPTV_LAN_RANGES="${IPTV_LAN_RANGES:-""}"
 
+# Use busybox if iproute2 is not installed
+if ! command -v ip > /dev/null 2>&1; then
+    alias ip="busybox ip"
+fi
+
+# Use busybox if udhcpc is not installed directly
+if ! command -v udhcpc > /dev/null 2>&1; then
+    alias udhcpc="busybox udhcpc"
+fi
+
 # Setup the network, creating the IPTV VLAN interface if necessary
 # and obtaining an IP address for the interface.
 _network_setup() {
@@ -25,7 +35,8 @@ _network_setup() {
 
         # Create VLAN interface (if it does not exist)
         if [ -e /sys/class/net/"$IPTV_WAN_VLAN_INTERFACE" ]; then
-            echo "Device $IPTV_WAN_VLAN_INTERFACE already exists"
+            echo "Device $IPTV_WAN_VLAN_INTERFACE already exists.. Deleting device"
+            ip link delete dev "$IPTV_WAN_VLAN_INTERFACE"
         elif ! ip link show "$IPTV_WAN_INTERFACE" >/dev/null; then
             echo "Device $IPTV_WAN_INTERFACE for $IPTV_WAN_VLAN_INTERFACE does not exist"
             exit 1
@@ -39,7 +50,7 @@ _network_setup() {
         echo "Obtaining IP address for VLAN interface"
 
         # Obtain IP address for VLAN interface
-        busybox udhcpc -b -R -p /var/run/udhcpc."$IPTV_WAN_VLAN_INTERFACE".pid -s "$(dirname "$0")"/udhcpc.hook -i "$IPTV_WAN_VLAN_INTERFACE" $IPTV_WAN_DHCP_OPTIONS
+        udhcpc -b -R -p /var/run/udhcpc."$IPTV_WAN_VLAN_INTERFACE".pid -s "$(dirname "$0")"/udhcpc.hook -i "$IPTV_WAN_VLAN_INTERFACE" $IPTV_WAN_DHCP_OPTIONS
     fi
 
     echo "NATing IPTV network ranges (if necessary)"

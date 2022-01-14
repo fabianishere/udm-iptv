@@ -11,13 +11,14 @@
 
 # Helper function to obtain IP address of interface
 _if_inet_addr() {
-    ip addr show dev "$1" | awk '$1 == "inet" { sub("/.*", "", $2); print $2 }'
+    # iproute2 might not be installed on target system
+    busybox ip addr show dev "$1" | awk '$1 == "inet" { sub("/.*", "", $2); print $2 }'
 }
 
 # Helper function to list interfaces
 _if_inet_list() {
     for interface in $(find /sys/class/net -name "br*" -exec basename {} \; | sort); do
-        id=$(echo "$interface" | sed -n 's/br\(.*\)/\1/p')
+        id=$(echo "$interface" | sed -n 's/br\(\d*\)/\1/p')
         type="LAN"
         if [ "$id" -gt 0 ]; then
             type="VLAN $id"

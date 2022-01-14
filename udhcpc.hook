@@ -16,6 +16,11 @@ export subnet
 
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 
+# Use busybox if iproute2 is not installed
+if ! command -v ip > /dev/null 2>&1; then
+    alias ip="busybox ip"
+fi
+
 run_scripts() {
     local dir=$1
     if [ -d $dir ]; then
