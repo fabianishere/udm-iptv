@@ -125,18 +125,17 @@ This package uses [igmpproxy](https://github.com/pali/igmpproxy) to route
 multicast IPTV traffic between WAN and LAN.
 
 ### Installation
-SSH into your machine and execute the following command:
-
+SSH into your machine and execute the commands below in UniFi OS (not in UbiOS).
+On the UniFi Dream Machine (Pro), use `unifi-os shell` to enter UniFi OS from
+within UbiOS.
 ```bash
 # Download udm-iptv package
-wget https://github.com/fabianishere/udm-iptv/releases/download/v2.0.2/udm-iptv_2.0.2_all.deb
+curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.0.2/udm-iptv_2.0.2_all.deb
 # Download a recent igmpproxy version
-wget http://ftp.debian.org/debian/pool/main/i/igmpproxy/igmpproxy_0.3-1_arm64.deb
+curl -O -L http://ftp.debian.org/debian/pool/main/i/igmpproxy/igmpproxy_0.3-1_arm64.deb
 # Install necessary packages
 apt install dialog ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.0.2_all.deb 
 ```
-If `apt` is not available, make sure you are in UniFi OS (and not UbiOS). Use
-`unifi-os shell` to enter UniFi OS from within UbiOS on the UniFi Dream Machine (Pro).
 
 This script will install the `udm-iptv` package onto your device.
 The installation process prompts the user with various questions to correctly
