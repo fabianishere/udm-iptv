@@ -129,11 +129,11 @@ SSH into your machine and execute the following command:
 
 ```bash
 # Download udm-iptv package
-wget https://github.com/fabianishere/udm-iptv/releases/download/v2.0.1/udm-iptv_2.0.1_all.deb
+wget https://github.com/fabianishere/udm-iptv/releases/download/v2.0.2/udm-iptv_2.0.2_all.deb
 # Download a recent igmpproxy version
 wget http://ftp.debian.org/debian/pool/main/i/igmpproxy/igmpproxy_0.3-1_arm64.deb
 # Install necessary packages
-apt install dialog ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.0.1_all.deb 
+apt install dialog ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.0.2_all.deb 
 ```
 If `apt` is not available, make sure you are in UniFi OS (and not UbiOS). Use
 `unifi-os shell` to enter UniFi OS from within UbiOS on the UniFi Dream Machine (Pro).

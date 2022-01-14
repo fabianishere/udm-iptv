@@ -62,7 +62,6 @@ while true; do
             UDMPRO|UDMPROSE)
                 db_subst udm-iptv/wan-port choices "WAN 1 (RJ45), WAN 2 (SFP+)"
                 db_subst udm-iptv/wan-port choices_c "eth8, eth9"
-                db_set udm-iptv/wan-port eth8
                 db_input high udm-iptv/wan-port || true
                 ;;
             UDM|UDMSE|UDR)
@@ -91,7 +90,6 @@ while true; do
             db_set udm-iptv/wan-interface "$RET"
 
             # Configure VLAN ID
-            db_set udm-iptv/wan-vlan 4
             db_input high udm-iptv/wan-vlan || true
         fi
         ;;

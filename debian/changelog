@@ -1,6 +1,12 @@
+udm-iptv (2.0.2) stable; urgency=medium
+
+  * Do not overwrite existing debconf selections during re-install.
+
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Fri, 14 Jan 2022 11:00:00 +0100
+
 udm-iptv (2.0.1) stable; urgency=medium
 
-  * Remove implicit dependency on iproute2
+  * Remove implicit dependency on iproute2.
   * Describe steps for ensuring persistence across firmware updates.
 
  -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Fri, 14 Jan 2022 10:30:00 +0100
