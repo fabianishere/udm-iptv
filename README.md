@@ -158,6 +158,18 @@ boot process of your UniFi device and that will set up the applications
 necessary to route IPTV traffic. After installation, the service is automatically
 started.
 
+### Ensuring Installation across Firmware Updates
+On certain UniFi devices, such as the UniFi Dream Machine SE, you may need to update the device configuration to have
+the installation of the udm-iptv package persist across firmware updates. Update
+`/etc/default/ubnt-dpkg-cache` (if it exists), as follows:
+
+```diff
+- DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-led unifi-talk unifi-connect uid-agent"
++ DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-led unifi-talk unifi-connect uid-agent dialog igmpproxy udm-iptv" 
+```
+If you do not perform this step, you will need to re-install the package after a
+firmware update. The configuration file will however remain.
+
 ### Configuration
 You can modify the configuration of the service interactively using `dpkg-reconfigure udm-iptv`.
 Alternatively, you can modify the configuration at `/etc/udm-iptv.conf` (within UniFi OS).
