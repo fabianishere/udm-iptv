@@ -11,6 +11,11 @@
 # Load configuration
 . /etc/udm-iptv.conf
 
+# Use busybox if iproute2 is not installed
+if ! command -v ip > /dev/null 2>&1; then
+    alias ip="busybox ip"
+fi
+
 if [ "$IPTV_WAN_VLAN" -ne 0 ]; then
     target="$IPTV_WAN_VLAN_INTERFACE"
 else
@@ -21,7 +26,7 @@ echo "Please share the following output with the developers:"
 echo "=== Configuration ==="
 echo "WAN Interface: $IPTV_WAN_INTERFACE"
 echo "WAN Ranges: $IPTV_WAN_RANGES"
-echo "WAN VLAN: $IPTV_WAN_VLAN"
+echo "WAN VLAN: $IPTV_WAN_VLAN (dev $IPTV_WAN_VLAN_INTERFACE)"
 echo "WAN DHCP options: $IPTV_WAN_DHCP_OPTIONS"
 echo "LAN Interfaces: $IPTV_LAN_INTERFACES"
 echo "IGMP Proxy quickleave disabled: $IPTV_IGMPPROXY_DISABLE_QUICKLEAVE"
