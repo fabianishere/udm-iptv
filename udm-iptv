@@ -33,16 +33,18 @@ _network_setup() {
     if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
         target="$IPTV_WAN_VLAN_INTERFACE"
 
-        # Create VLAN interface (if it does not exist)
+        if ! ip link show "$IPTV_WAN_INTERFACE" >/dev/null; then
+            echo "Device $IPTV_WAN_INTERFACE for $IPTV_WAN_VLAN_INTERFACE does not exist"
+            exit 1
+        fi
+
+        # Delete existing VLAN interface
         if [ -e /sys/class/net/"$IPTV_WAN_VLAN_INTERFACE" ]; then
             echo "Device $IPTV_WAN_VLAN_INTERFACE already exists.. Deleting device"
             ip link delete dev "$IPTV_WAN_VLAN_INTERFACE"
-        elif ! ip link show "$IPTV_WAN_INTERFACE" >/dev/null; then
-            echo "Device $IPTV_WAN_INTERFACE for $IPTV_WAN_VLAN_INTERFACE does not exist"
-            exit 1
-        else
-            ip link add link "$IPTV_WAN_INTERFACE" name "$IPTV_WAN_VLAN_INTERFACE" type vlan id "$IPTV_WAN_VLAN"
         fi
+
+        ip link add link "$IPTV_WAN_INTERFACE" name "$IPTV_WAN_VLAN_INTERFACE" type vlan id "$IPTV_WAN_VLAN"
 
         # Bring VLAN interface up
         ip link set dev "$IPTV_WAN_VLAN_INTERFACE" up
