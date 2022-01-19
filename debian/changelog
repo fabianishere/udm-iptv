@@ -1,3 +1,9 @@
+udm-iptv (2.0.3) stable; urgency=medium
+
+  * Recreate IPTV interface after deletion.
+
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Wed, 19 Jan 2022 16:00:00 +0100
+
 udm-iptv (2.0.2) stable; urgency=medium
 
   * Do not overwrite existing debconf selections during re-install.
