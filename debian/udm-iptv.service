@@ -7,6 +7,8 @@ Type=simple
 EnvironmentFile=/etc/udm-iptv.conf
 ExecStart=/usr/lib/udm-iptv/udm-iptv start
 ExecStop=/usr/lib/udm-iptv/udm-iptv stop
+Restart=on-failure
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
