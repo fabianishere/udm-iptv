@@ -167,22 +167,25 @@ the installation of the udm-iptv package persist across firmware updates. Update
 + DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-led unifi-talk unifi-connect uid-agent dialog igmpproxy udm-iptv" 
 ```
 If you do not perform this step, you will need to re-install the package after a
-firmware update. The configuration file will however remain.
+firmware update.
 
 ### Configuration
-You can modify the configuration of the service interactively using `dpkg-reconfigure udm-iptv`.
-Alternatively, you can modify the configuration at `/etc/udm-iptv.conf` (within UniFi OS).
-See below for a reference of the available options to configure.
+You can modify the configuration of the service interactively using `dpkg-reconfigure -p medium udm-iptv`.
+See below for a reference of the available options to configure:
 
 | Environmental Variable  | Description                                                                                             | Default                            |
 |-------------------------|---------------------------------------------------------------------------------------------------------|------------------------------------|
 | IPTV_WAN_INTERFACE      | Interface on which IPTV traffic enters the router                                                       | eth8 (on UDM Pro) or eth4 (on UDM) |
 | IPTV_WAN_RANGES         | IP ranges from which the IPTV traffic originates (separated by spaces)                                  | 213.75.0.0/16 217.166.0.0/16       |
 | IPTV_WAN_VLAN           | ID of VLAN which carries IPTV traffic (use 0 if no VLAN is used)                                        | 4                                  |
-| IPTV_WAN_VLAN_INTERFACE | Name of the VLAN interface to be created                                                                | iptv                               |
 | IPTV_WAN_DHCP_OPTIONS   | [DHCP options](https://busybox.net/downloads/BusyBox.html#udhcpc) to send when requesting an IP address | -O staticroutes -V IPTV_RG         |
 | IPTV_LAN_INTERFACES     | Interfaces on which IPTV should be made available                                                       | br0                                |
 | IPTV_IGMPPROXY_DEBUG    | Enable debugging for igmpproxy                                                                          | false                              |
+
+The configuration is written to `/etc/udm-iptv.conf` (within UniFi OS). Note
+that the contents of this file are updated according to the values specified in
+the `debconf` database (as a result of the configuration dialog), causing manual 
+changes to this file to not be persisted across updates. 
 
 ### Removal
 To fully remove an `udm-iptv` installation from your UniFi device, run the follow command:

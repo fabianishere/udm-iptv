@@ -110,7 +110,7 @@ while true; do
     8)  # Configure igmpproxy
         db_beginblock
         db_input low udm-iptv/igmpproxy-quickleave || true
-        db_input low udm-iptv/igmpproxy-debug || true
+        db_input medium udm-iptv/igmpproxy-debug || true
         db_endblock
         ;;
     9)  # Complete configuration
