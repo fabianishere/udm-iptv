@@ -1,3 +1,11 @@
+udm-iptv (2.0.4) stable; urgency=medium
+
+  * Restart udm-iptv service on failure.
+  * Add support for custom MAC address on VLAN interface.
+  * Increase priority on igmpproxy debug setting.
+
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Sat, 22 Jan 2022 12:30:00 +0100
+
 udm-iptv (2.0.3) stable; urgency=medium
 
   * Recreate IPTV interface after deletion.
