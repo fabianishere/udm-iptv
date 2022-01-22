@@ -141,9 +141,9 @@ This script will install the `udm-iptv` package onto your device.
 The installation process prompts the user with various questions to correctly
 configure the package. Below is a useful list of configuration values for various IPTV providers:
 
-| Provider      | WAN VLAN | WAN Ranges                                                             | Notes                                            |
-|---------------|:--------:|------------------------------------------------------------------------|--------------------------------------------------|
-| KPN (NL)      |    4     | 213.75.0.0/16 217.166.0.0/16                                           | DHCP options set to `-O staticroutes -V IPTV_RG` |
+| Provider      | WAN VLAN | WAN Ranges                                                            | Notes                                            |
+|---------------|:--------:|-----------------------------------------------------------------------|--------------------------------------------------|
+| KPN (NL)      |    4     | 213.75.0.0/16 217.166.0.0/16                                          | DHCP options set to `-O staticroutes -V IPTV_RG` |
  | Tweak (NL)    |    4     | 239.0.3.0/16 225.0.71.0/24 224.0.0.0/16                               |                                                  |
  | Telekom (DE)  |    0     | 232.0.0.0/16 87.141.0.0/16                                            | Telekom uses VLAN 7 for both internet and IPTV   |
  | Swisscom (CH) |    0     | 195.186.0.0/16 213.3.72.0/24 224.0.0.0/4                              |                                                  |
@@ -160,7 +160,7 @@ started.
 ### Ensuring Installation across Firmware Updates
 On certain UniFi devices, such as the UniFi Dream Machine SE, you may need to update the device configuration to have
 the installation of the udm-iptv package persist across firmware updates. Update
-`/etc/default/ubnt-dpkg-cache` (if it exists), as follows:
+`/etc/default/ubnt-dpkg-cache` as follows:
 
 ```diff
 - DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-led unifi-talk unifi-connect uid-agent"
@@ -186,6 +186,16 @@ The configuration is written to `/etc/udm-iptv.conf` (within UniFi OS). Note
 that the contents of this file are updated according to the values specified in
 the `debconf` database (as a result of the configuration dialog), causing manual 
 changes to this file to not be persisted across updates. 
+
+### Upgrading
+Upgrading the installation of udm-iptv is achieved by downloading a new version
+of the package and installing it via `apt`. The service should automatically
+restart after upgrading.
+
+```bash
+curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.0.3/udm-iptv_2.0.3_all.deb
+apt install ./udm-iptv_2.0.3_all.deb 
+```
 
 ### Removal
 To fully remove an `udm-iptv` installation from your UniFi device, run the follow command:
