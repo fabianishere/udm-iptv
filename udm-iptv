@@ -46,6 +46,11 @@ _network_setup() {
 
         ip link add link "$IPTV_WAN_INTERFACE" name "$IPTV_WAN_VLAN_INTERFACE" type vlan id "$IPTV_WAN_VLAN"
 
+        # Specify custom MAC address for VLAN interface
+        if [ -n "$IPTV_WAN_VLAN_MAC" ]; then
+            ip link set dev "$IPTV_WAN_VLAN_INTERFACE" address "$IPTV_WAN_VLAN_MAC"
+        fi
+
         # Bring VLAN interface up
         ip link set dev "$IPTV_WAN_VLAN_INTERFACE" up
 
