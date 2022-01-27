@@ -170,6 +170,13 @@ the installation of the udm-iptv package persist across firmware updates. Update
 - DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-led unifi-talk unifi-connect uid-agent"
 + DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-led unifi-talk unifi-connect uid-agent dialog igmpproxy udm-iptv" 
 ```
+
+For the Unifi Dream Router, use as follow:
+```diff
+- DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-talk unifi-connect uid-agent"
++ DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-talk unifi-connect uid-agent dialog igmpproxy udm-iptv" 
+```
+
 If you do not perform this step, you will need to re-install the package after a
 firmware update.
 
