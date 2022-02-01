@@ -162,23 +162,19 @@ necessary to route IPTV traffic. After installation, the service is automaticall
 started.
 
 ### Ensuring Installation across Firmware Updates
-On certain UniFi devices, such as the UniFi Dream Machine SE, you may need to update the device configuration to have
-the installation of the udm-iptv package persist across firmware updates. Update
-`/etc/default/ubnt-dpkg-cache` as follows:
+On certain UniFi devices, such as the UniFi Dream Machine SE, you may need to
+update the device configuration to have the installation of the udm-iptv 
+package persist across firmware updates. Update `/etc/default/ubnt-dpkg-cache` 
+as follows (_only_ if it exists):
 
-```diff
-- DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-led unifi-talk unifi-connect uid-agent"
-+ DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-led unifi-talk unifi-connect uid-agent dialog igmpproxy udm-iptv" 
-```
-
-For the Unifi Dream Router, use as follow:
-```diff
-- DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-talk unifi-connect uid-agent"
-+ DPKG_CACHE_UBNT_PKGS="unifi unifi-protect unifi-access unifi-talk unifi-connect uid-agent dialog igmpproxy udm-iptv" 
+```bash
+sed -e '/^DPKG_CACHE_UBNT_PKGS+=" udm-iptv igmpproxy dialog"/{:a;n;ba;q}' -e '$aDPKG_CACHE_UBNT_PKGS+=" udm-iptv igmpproxy dialog"' -i /etc/default/ubnt-dpkg-cache
 ```
 
 If you do not perform this step, you will need to re-install the package after a
-firmware update.
+firmware update. Note that your configuration might be lost across firmware
+updates, as a consequence of Ubiquiti's firmware flashing process ([#49](https://github.com/fabianishere/udm-iptv/issues/49)).
+**Please make a backup of your configuration before a firmware update**.
 
 ### Configuration
 You can modify the configuration of the service interactively using `dpkg-reconfigure -p medium udm-iptv`.
