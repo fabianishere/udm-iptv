@@ -130,11 +130,11 @@ On the UniFi Dream Machine (Pro), use `unifi-os shell` to enter UniFi OS from
 within UbiOS.
 ```bash
 # Download udm-iptv package
-curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.0.4/udm-iptv_2.0.4_all.deb
+curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.0.5/udm-iptv_2.0.5_all.deb
 # Download a recent igmpproxy version
 curl -O -L http://ftp.debian.org/debian/pool/main/i/igmpproxy/igmpproxy_0.3-1_arm64.deb
 # Install necessary packages
-apt install dialog ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.0.4_all.deb 
+apt install dialog ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.0.5_all.deb 
 ```
 
 This script will install the `udm-iptv` package onto your device.
@@ -200,8 +200,8 @@ of the package and installing it via `apt`. The service should automatically
 restart after upgrading.
 
 ```bash
-curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.0.4/udm-iptv_2.0.4_all.deb
-apt install ./udm-iptv_2.0.4_all.deb 
+curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.0.5/udm-iptv_2.0.5_all.deb
+apt install ./udm-iptv_2.0.5_all.deb 
 ```
 
 ### Removal
