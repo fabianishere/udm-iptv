@@ -27,12 +27,23 @@ _if_inet_list() {
     done
 }
 
-# Helper function to list all slave interface of some interface
-_if_inet_list_slaves() {
+# Helper function to list the lower interface of some interface
+_if_inet_list_lower() {
+    for path in "$1"/lower_*; do
+        if ! [ -e "$path" ]; then
+                basename "$(readlink "$1")"
+                break
+        fi
+        _if_inet_list_lower "$path"
+    done
+}
+
+# Helper function to list all upper interfaces of some interface
+_if_inet_list_upper() {
     basename "$(readlink "$1")"
     for path in "$1"/upper_*; do
         [ -e "$path" ] || continue
-        _if_inet_list_slaves "$path"
+        _if_inet_list_upper "$path"
     done
 }
 
@@ -49,7 +60,30 @@ db_version 2.0
 db_capb backup
 db_capb escape
 
-# facilitate backup capability per debconf-devel(7)
+# Restore existing configuration
+CONFIGFILE=/etc/udm-iptv.conf
+if [ -e $CONFIGFILE ]; then
+    # shellcheck source=../udm-iptv.conf
+    . $CONFIGFILE || true
+
+    # Store values from config file into debconf db.
+    db_set udm-iptv/wan-port "$(_if_inet_list_lower /sys/class/net/"$IPTV_WAN_INTERFACE")"
+    db_set udm-iptv/wan-interface "$IPTV_WAN_INTERFACE"
+
+    db_set udm-iptv/wan-vlan-separate "$([ "$IPTV_WAN_INTERFACE" = 0 ] && echo "false" || echo "true")"
+    db_set udm-iptv/wan-vlan "$IPTV_WAN_VLAN"
+    db_set udm-iptv/wan-vlan-interface "$IPTV_WAN_VLAN_INTERFACE"
+
+    db_set udm-iptv/wan-ranges "$(echo "$IPTV_WAN_RANGES" | tr -s ' ' ',')"
+    db_set udm-iptv/wan-dhcp-options "$IPTV_WAN_DHCP_OPTIONS"
+
+    db_set udm-iptv/lan-interfaces "$(echo "$IPTV_LAN_INTERFACES" | tr -s ' ' ',')"
+
+    db_set udm-iptv/igmpproxy-quickleave "$([ -n "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" ] && [ "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" != "false" ] && echo "false" || echo "true")"
+    db_set udm-iptv/igmpproxy-debug "$IPTV_IGMPPROXY_DEBUG"
+fi
+
+# Facilitate backup capability per debconf-devel(7)
 STATE=1
 while true; do
     case "$STATE" in
@@ -82,7 +116,7 @@ while true; do
             db_set udm-iptv/wan-vlan 0
 
             db_get udm-iptv/wan-port
-            db_subst udm-iptv/wan-interface choices "$(_if_inet_list_slaves "/sys/class/net/$RET" | sed ':a;N;s/\n/, /;ba')"
+            db_subst udm-iptv/wan-interface choices "$(_if_inet_list_upper "/sys/class/net/$RET" | sed ':a;N;s/\n/, /;ba')"
             db_input high udm-iptv/wan-interface || true
         else
             # WAN port is same as WAN interface
