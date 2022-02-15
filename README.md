@@ -134,7 +134,7 @@ curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.0.5/udm
 # Download a recent igmpproxy version
 curl -O -L http://ftp.debian.org/debian/pool/main/i/igmpproxy/igmpproxy_0.3-1_arm64.deb
 # Install necessary packages
-apt install dialog ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.0.5_all.deb 
+apt update && apt install dialog ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.0.5_all.deb
 ```
 
 This script will install the `udm-iptv` package onto your device.
