@@ -161,6 +161,9 @@ boot process of your UniFi device and that will set up the applications
 necessary to route IPTV traffic. After installation, the service is automatically
 started.
 
+If you experience any issues while setting up the service, please visit the
+[Troubleshooting](#troubleshooting-and-known-issues) section.
+
 ### Ensuring Installation across Firmware Updates
 On certain UniFi devices, such as the UniFi Dream Machine SE, you may need to
 update the device configuration to have the installation of the udm-iptv 
@@ -257,8 +260,13 @@ Make sure you are running inside UniFi OS.
    journalctl -u udm-iptv
    ```
 
-### Reporting an Issue
-Please share the diagnostics reported by the service when reporting an issue:
+### Getting Help or Reporting an Issue
+If your issues persist, you may seek help on our [Discussions](https://github.com/fabianishere/udm-iptv/discussions) page.
+Please keep [GitHub Issues](https://github.com/fabianishere/udm-iptv/issues)
+only for bugs or feature requests related to the project (no configuration-related issues).
+
+When opening a discussion or reporting an issue, **please share the name of your
+ISP as well as the diagnostics reported by our diagnostic tool**:
 ```bash
 udm-iptv-diag
 ```

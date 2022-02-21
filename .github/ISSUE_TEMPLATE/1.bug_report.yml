@@ -1,0 +1,29 @@
+name: Bug Report
+description: Report a bug in udm-iptv.
+labels: 'kind/bug'
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to file a bug report! Please fill out this form as completely as possible.
+  - type: input
+    attributes:
+      label: What is your ISP? (if relevant)
+      description: 'The name of your Internet Service Provider (ISP) that supplies you with an internet connection (e.g., KPN).'
+  - type: textarea
+    attributes:
+      label: Diagnostic Information
+      description: Please provide the diagnostic output of `udm-iptv-diag`.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
