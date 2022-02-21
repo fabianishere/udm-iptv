@@ -103,20 +103,10 @@ additional DHCP options. You can add these DHCP options as follows:
    devices that should receive it.
 5. Go to **Advanced > DHCP Option** and add the following options:
 
-   | Name      | Code | Type       | Value               |
-   |-----------|:----:|------------|---------------------|
-   | IPTV      |  60  | Text       | IPTV_RG             |
-   | Broadcast |  28  | IP Address | _BROADCAST_ADDRESS_ |
+   | Name                    | Code | Type       | Value               |
+   |-------------------------|:----:|------------|---------------------|
+   | Vendor Class Identifier |  60  | Text       | IPTV_RG             |
 
-   Replace _BROADCAST_ADDRESS_ with the broadcast address of your LAN network.
-   To get this address, you can obtain it by setting all bits outside the subnet
-   mask of your IP range, for instance:
-   ```
-   192.168.X.1/24 => 192.168.X.255
-   192.168.0.1/16 => 192.168.255.255
-   ```
-   See [here](https://en.wikipedia.org/wiki/Broadcast_address) for more
-   information.
 
 ## Configuring Helper Tool
 
