@@ -184,10 +184,7 @@ See below for a reference of the available options to configure:
 | IPTV_LAN_INTERFACES     | Interfaces on which IPTV should be made available                                                       | br0                                |
 | IPTV_IGMPPROXY_DEBUG    | Enable debugging for igmpproxy                                                                          | false                              |
 
-The configuration is written to `/etc/udm-iptv.conf` (within UniFi OS). Note
-that the contents of this file are updated according to the values specified in
-the `debconf` database (as a result of the configuration dialog), causing manual 
-changes to this file to not be persisted across updates. 
+The configuration is written to `/etc/udm-iptv.conf` (within UniFi OS).
 
 ### Upgrading
 Upgrading the installation of udm-iptv is achieved by downloading a new version
