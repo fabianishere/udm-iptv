@@ -123,8 +123,10 @@ within UbiOS.
 curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.0.5/udm-iptv_2.0.5_all.deb
 # Download a recent igmpproxy version
 curl -O -L http://ftp.debian.org/debian/pool/main/i/igmpproxy/igmpproxy_0.3-1_arm64.deb
-# Install necessary packages
-apt update && apt install dialog ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.0.5_all.deb
+# Update APT sources and install dialog package for interactive install
+apt update && apt install dialog
+# Install udm-iptv and igmpproxy
+apt install ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.0.5_all.deb
 ```
 
 This script will install the `udm-iptv` package onto your device.
