@@ -145,6 +145,7 @@ configure the package. Below is a useful list of configuration values for variou
 |        MEO (PT) |    0     | 10.159.0.0/16 10.173.0.0/16 194.65.46.0/23 213.13.16.0/20 224.0.0.0/4 |                                                                                                            |
 |         BT (GB) |    0     | 224.0.0.0/4 109.159.247.0/24                                          | [Custom configuration](https://github.com/fabianishere/udm-iptv/issues/2#issuecomment-929968478) required  |
 |    Vivo SP (BR) |   20     | 172.28.0.0/14  201.0.52.0/23  200.161.71.0/24  177.16.0.0/16          | Set DNS servers to 177.16.30.67 and 177.16.30.7 for internal IPTV network |
+|    Telenor (NO) |    0     | 224.0.0.0/4, 93.91.111.0/24, 148.122.7.125                         |      |
 
 Feel free to update this list with the configuration of your provider.
 
