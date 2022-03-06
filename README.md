@@ -99,13 +99,13 @@ additional DHCP options. You can add these DHCP options as follows:
 2. Select the LAN network on which IPTV will be used.
    We recommend creating a separate LAN network for IPTV traffic if possible in
    order to reduce interference of other devices on the network.
-4. Enable **Advanced > IGMP Snooping**, so IPTV traffic is only sent to
-   devices that should receive it.
-5. Go to **Advanced > DHCP Option** and add the following options:
+3. Enable **Advanced Configuration > IGMP Snooping**, so IPTV traffic is only
+   sent to devices that should receive it.
+4. Go to **DHCP > Custom DHCP Option** and add the following options:
 
-   | Name                    | Code | Type       | Value               |
-   |-------------------------|:----:|------------|---------------------|
-   | Vendor Class Identifier |  60  | Text       | IPTV_RG             |
+   | Name       | Code | Type       | Value               |
+   |------------|:----:|------------|---------------------|
+   | IPTV-Class |  60  | Text       | IPTV_RG             |
 
 
 ## Configuring Helper Tool
