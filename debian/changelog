@@ -1,3 +1,11 @@
+udm-iptv (2.1.0) stable; urgency=medium
+
+  * Make MAC address configurable through installer.
+  * Support static IP assignment.
+  * Add support for configuration profiles.
+
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Wed, 9 Mar 2022 23:45:00 +0100
+
 udm-iptv (2.0.5) stable; urgency=medium
 
   * Prevent overwriting existing configuration.
