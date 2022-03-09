@@ -73,6 +73,7 @@ if [ -e $CONFIGFILE ]; then
     db_set udm-iptv/wan-vlan-separate "$([ "$IPTV_WAN_INTERFACE" = 0 ] && echo "false" || echo "true")"
     db_set udm-iptv/wan-vlan "$IPTV_WAN_VLAN"
     db_set udm-iptv/wan-vlan-interface "$IPTV_WAN_VLAN_INTERFACE"
+    db_set udm-iptv/wan-vlan-mac "$IPTV_WAN_VLAN_MAC"
 
     db_set udm-iptv/wan-ranges "$(echo "$IPTV_WAN_RANGES" | tr -s ' ' ',')"
     db_set udm-iptv/wan-dhcp-options "$IPTV_WAN_DHCP_OPTIONS"
@@ -130,24 +131,27 @@ while true; do
     4)  # Configure VLAN interface name
         db_input low udm-iptv/wan-vlan-interface || true
         ;;
-    5)  # Configure WAN ranges
+    5)  # Configure MAC address of VLAN interface
+        db_input low udm-iptv/wan-vlan-mac || true
+        ;;
+    6)  # Configure WAN ranges
         db_input high udm-iptv/wan-ranges || true
         ;;
-    6)  # Configure DHCP options
+    7)  # Configure DHCP options
         db_input high udm-iptv/wan-dhcp-options || true
         ;;
-    7)  # Select LAN interfaces
+    8)  # Select LAN interfaces
         db_subst udm-iptv/lan-interfaces choices "$(_if_inet_list | sed ':a;N;s/\n/, /;ba')"
         db_subst udm-iptv/lan-interfaces choices_c "$(find /sys/class/net -name "br*" -exec basename {} \; | sort | sed ':a;N;s/\n/, /;ba')"
         db_input high udm-iptv/lan-interfaces || true
         ;;
-    8)  # Configure igmpproxy
+    9)  # Configure igmpproxy
         db_beginblock
         db_input low udm-iptv/igmpproxy-quickleave || true
         db_input medium udm-iptv/igmpproxy-debug || true
         db_endblock
         ;;
-    9)  # Complete configuration
+    10)  # Complete configuration
         exit 0
         ;;
     *)  # unknown state

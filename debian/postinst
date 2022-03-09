@@ -24,6 +24,16 @@ replace_conf() {
     fi
 }
 
+# Remove a debconf answer from a configuration file with the syntax of
+# /etc/udm-iptv.conf
+remove_conf() {
+    file="$1"
+    setting="$2"
+    if grep -q "^${setting}=" "$file"; then
+        sed -i -re "/^${setting}=.*$/d" "$file"
+    fi
+}
+
 tmpconf=$(mktemp -t iptv.XXXX.conf)
 # Copy original configuration into temp file
 cp /etc/udm-iptv.conf "$tmpconf" || true
@@ -36,6 +46,13 @@ replace_conf "$tmpconf" "IPTV_WAN_VLAN" "$RET"
 
 db_get udm-iptv/wan-vlan-interface
 replace_conf "$tmpconf" "IPTV_WAN_VLAN_INTERFACE" "$RET"
+
+db_get udm-iptv/wan-vlan-mac
+if [ -n "$RET" ]; then
+    replace_conf "$tmpconf" "IPTV_WAN_VLAN_MAC" "$RET"
+else
+    remove_conf "$tmpconf" "IPTV_WAN_VLAN_MAC"
+fi
 
 db_get udm-iptv/wan-ranges
 replace_conf "$tmpconf" "IPTV_WAN_RANGES" "$(echo "$RET" | tr ',' ' ')"

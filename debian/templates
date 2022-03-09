@@ -24,6 +24,11 @@ Description: Name of the IPTV VLAN interface:
 Type: string
 Default: iptv
 
+Template: udm-iptv/wan-vlan-mac
+Description: Custom MAC address for the IPTV VLAN interface:
+Type: string
+Default:
+
 Template: udm-iptv/wan-ranges
 Description: IP ranges from which the IPTV traffic originates:
 Type: string
