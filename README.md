@@ -130,24 +130,29 @@ apt install ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.0.5_all.deb
 ```
 
 This script will install the `udm-iptv` package onto your device.
-The installation process prompts the user with various questions to correctly
-configure the package. Below is a useful list of configuration values for various IPTV providers:
+The installation process supports various pre-defined configuration profiles for
+popular IPTV providers. Below is a list of supported IPTV providers: 
 
-|        Provider | WAN VLAN | WAN Ranges                                                            | Notes                                                                                                      |
-|----------------:|:--------:|-----------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|
-|        KPN (NL) |    4     | 213.75.0.0/16 217.166.0.0/16                                          | Use default DHCP options (`-O staticroutes -V IPTV_RG`)                                                    |
-|      Tweak (NL) |    4     | 0.0.0.0/0                                                             | DHCP options: `-O staticroutes`. Use different MAC address for VLAN interface (`IPTV_WAN_VLAN_MAC="xx:xx:xx:xx:xx:xx"`) |
-|     Solcon (NL) | 4/24/188 | 10.0.0.0/8  10.252.0.0/16 10.253.0.0/16 217.166.0.0/16                | Use default DHCP options                                                                                   |
-|    Telekom (DE) |    0     | 232.0.0.0/16 87.141.0.0/16                                            | Telekom uses VLAN 7 for both internet and IPTV                                                             |
-|  MagentaTV (DE) |    0     | 224.0.0.0/4 87.141.0.0/16 193.158.0.0/15                              | [Custom configuration](https://github.com/fabianishere/udm-iptv/issues/2#issuecomment-1007413230) required |
-|   Swisscom (CH) |    0     | 195.186.0.0/16 213.3.72.0/24 224.0.0.0/4                              |                                                                                                            |
-|      Init7 (CH) |    0     | 224.0.0.0/8 239.0.0.0/8 77.109.128.0/19                                               |                                                                                                            |
-|        MEO (PT) |    0     | 10.159.0.0/16 10.173.0.0/16 194.65.46.0/23 213.13.16.0/20 224.0.0.0/4 |                                                                                                            |
-|         BT (GB) |    0     | 224.0.0.0/4 109.159.247.0/24                                          | [Custom configuration](https://github.com/fabianishere/udm-iptv/issues/2#issuecomment-929968478) required  |
-|    Vivo SP (BR) |   20     | 172.28.0.0/14  201.0.52.0/23  200.161.71.0/24  177.16.0.0/16          | Set DNS servers to 177.16.30.67 and 177.16.30.7 for internal IPTV network |
-|    Telenor (NO) |    0     | 224.0.0.0/4, 93.91.111.0/24, 148.122.7.125                         |      |
+|  Provider | Country | Supported                                                                                                   |
+|----------:|:-------:|-------------------------------------------------------------------------------------------------------------|
+|       KPN |   NL    | Yes                                                                                                         |
+|    XS4ALL |   NL    | Yes                                                                                                         |
+|     Tweak |   NL    | Yes                                                                                                         |
+|    Solcon |   NL    | Yes                                                                                                         |
+|   Telekom |   DE    | [Manual configuration necessary](https://github.com/fabianishere/udm-iptv/discussions/8)                    |
+| MagentaTV |   DE    | [Manual configuration necessary](https://github.com/fabianishere/udm-iptv/issues/2#issuecomment-1007413230) |
+|  Swisscom |   CH    | Yes                                                                                                         |
+|     Init7 |   CH    | Yes                                                                                                         |
+|       MEO |   PT    | Yes                                                                                                         |
+|        BT |   GB    | Yes                                                                                                         |
+|   Vivo SP |   BR    | Yes                                                                                                         |
+|   Telenor |   NO    | Yes                                                                                                         |
 
-Feel free to update this list with the configuration of your provider.
+If your ISP is not supported, you may select the _Custom_ profile, which allows
+you manually configure the package to your needs. 
+We appreciate if you share the configuration so others can also benefit.
+See the [profiles](profiles/) directory for examples of existing configuration
+profiles.
 
 The package installs a service that is started during the
 boot process of your UniFi device and that will set up the applications

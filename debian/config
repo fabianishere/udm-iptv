@@ -47,6 +47,20 @@ _if_inet_list_upper() {
     done
 }
 
+# Helper function to list of profiles available
+_list_profiles() {
+    echo "kpn", "KPN (NL)"
+    echo "kpn", "XS4ALL (NL)"
+    echo "tweak", "Tweak (NL)"
+    echo "solcon", "Solcon (NL)"
+    echo "swisscom", "Swisscom (CH)"
+    echo "init7", "Init7 (CH)"
+    echo "meo", "MEO (PT)"
+    echo "bt", "BT (GB)"
+    echo "telenor", "Telenor (NO)"
+    echo "vivo", "Vivo SP (BR)"
+}
+
 # Obtain the board name of the device running the installation script
 if [ -e /etc/board.info ] && grep -q "board.shortname" /etc/board.info; then
     board=$(sed -n 's/^board.shortname=\s*\(.*\)\s*/\1/p' /etc/board.info)
@@ -109,68 +123,27 @@ while true; do
                 ;;
         esac
         ;;
-    2)  # Ask whether IPTV traffic is carried over separate VLAN
-        db_input high udm-iptv/wan-vlan-separate || true
+    2)  # Select configuration profile
+        db_subst udm-iptv/profile choices "Custom, $(_list_profiles | cut -d, -f 2  | sed -e 's/^[[:space:]]*//' | sort | sed ':a;N;s/\n/, /;ba')"
+        db_subst udm-iptv/profile choices_c "custom, $(_list_profiles | cut -d, -f 1  | sed -e 's/^[[:space:]]*//' | sort | sed ':a;N;s/\n/, /;ba')"
+        db_input high udm-iptv/profile || true
         ;;
-    3)  # If IPTV traffic is carried over a separate VLAN, ask which ID
-        db_get udm-iptv/wan-vlan-separate
-        if [ "$RET" = false ]; then
-            # IPTV traffic is on native VLAN
-            db_set udm-iptv/wan-vlan 0
-            # Disable DHCP by default
-            db_set udm-iptv/wan-dhcp false
-
-            db_get udm-iptv/wan-port
-            db_subst udm-iptv/wan-interface choices "$(_if_inet_list_upper "/sys/class/net/$RET" | sed ':a;N;s/\n/, /;ba')"
-            db_input high udm-iptv/wan-interface || true
-        else
-            # WAN port is same as WAN interface
-            db_get udm-iptv/wan-port
-            db_set udm-iptv/wan-interface "$RET"
-
-            # Enable DHCP by default
-            db_set udm-iptv/wan-dhcp true
-
-            # Configure VLAN ID
-            db_input high udm-iptv/wan-vlan || true
-        fi
+    3)  # Perform profile configuration
+        db_get udm-iptv/profile
+        . /usr/lib/udm-iptv/profiles/"$RET".profile
         ;;
-    4)
-        db_get udm-iptv/wan-vlan-separate
-        if [ "$RET" = true ]; then
-            # Configure VLAN interface name
-            db_input low udm-iptv/wan-vlan-interface || true
-        fi
-        ;;
-    5)  # Configure MAC address of VLAN interface
-        db_input low udm-iptv/wan-vlan-mac || true
-        ;;
-    6)  # Configure WAN ranges
-        db_input high udm-iptv/wan-ranges || true
-        ;;
-    7)  # Override DHCP
-        db_input low udm-iptv/wan-dhcp || true
-        ;;
-    8)  # Configure DHCP options
-        db_get udm-iptv/wan-dhcp
-        if [ "$RET" = true ]; then
-            db_input high udm-iptv/wan-dhcp-options || true
-        else
-            db_input low udm-iptv/wan-static-ip || true
-        fi
-        ;;
-    9)  # Select LAN interfaces
+    4)  # Select LAN interfaces
         db_subst udm-iptv/lan-interfaces choices "$(_if_inet_list | sed ':a;N;s/\n/, /;ba')"
         db_subst udm-iptv/lan-interfaces choices_c "$(find /sys/class/net -name "br*" -exec basename {} \; | sort | sed ':a;N;s/\n/, /;ba')"
         db_input high udm-iptv/lan-interfaces || true
         ;;
-    10)  # Configure igmpproxy
+    5)  # Configure igmpproxy
         db_beginblock
         db_input low udm-iptv/igmpproxy-quickleave || true
         db_input medium udm-iptv/igmpproxy-debug || true
         db_endblock
         ;;
-    11)  # Complete configuration
+    6)  # Complete configuration
         exit 0
         ;;
     *)  # unknown state

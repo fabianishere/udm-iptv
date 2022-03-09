@@ -4,6 +4,16 @@ Type: select
 Choices: ${choices}
 Choices-C: ${choices_c}
 
+Template: udm-iptv/profile
+Description: Configuration profile to use:
+Type: select
+Choices: ${choices}
+Choices-C: ${choices_c}
+
+Template: udm-iptv/profile-note
+Type: note
+Description: ${note}
+
 Template: udm-iptv/wan-interface
 Description: Interface on which IPTV traffic enters the router:
 Type: select
