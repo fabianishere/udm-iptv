@@ -34,10 +34,19 @@ Description: IP ranges from which the IPTV traffic originates:
 Type: string
 Default: 213.75.0.0/16, 217.166.0.0/16
 
+Template: udm-iptv/wan-dhcp
+Description: Obtain IP address for IPTV interface via DHCP?
+Type: boolean
+
 Template: udm-iptv/wan-dhcp-options
 Description: DHCP options to send when requesting an IP address:
 Type: string
 Default: -O staticroutes -V IPTV_RG
+
+Template: udm-iptv/wan-static-ip
+Description: Static IP address to assign to IPTV interface:
+Type: string
+Default:
 
 Template: udm-iptv/lan-interfaces
 Description: LAN interfaces on which IPTV should be made available:

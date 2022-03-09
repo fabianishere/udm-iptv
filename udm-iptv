@@ -54,10 +54,16 @@ _network_setup() {
         # Bring VLAN interface up
         ip link set dev "$IPTV_WAN_VLAN_INTERFACE" up
 
-        echo "Obtaining IP address for VLAN interface"
+        if [ "$IPTV_WAN_DHCP_ENABLE" != "false" ]; then
+            echo "Obtaining IP address for VLAN interface"
 
-        # Obtain IP address for VLAN interface
-        udhcpc -b -R -p /var/run/udhcpc."$IPTV_WAN_VLAN_INTERFACE".pid -s "$(dirname "$0")"/udhcpc.hook -i "$IPTV_WAN_VLAN_INTERFACE" $IPTV_WAN_DHCP_OPTIONS
+            # Obtain IP address for VLAN interface
+            udhcpc -b -R -p /var/run/udhcpc."$IPTV_WAN_VLAN_INTERFACE".pid -s "$(dirname "$0")"/udhcpc.hook -i "$IPTV_WAN_VLAN_INTERFACE" $IPTV_WAN_DHCP_OPTIONS
+        fi
+    fi
+
+    if [ "$IPTV_WAN_DHCP_ENABLE" != "false" ] && [ -n "$IPTV_WAN_STATIC_IP" ]; then
+        ip -4 addr change "$IPTV_WAN_STATIC_IP" dev "$target"
     fi
 
     echo "NATing IPTV network ranges (if necessary)"

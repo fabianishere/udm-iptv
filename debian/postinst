@@ -57,8 +57,18 @@ fi
 db_get udm-iptv/wan-ranges
 replace_conf "$tmpconf" "IPTV_WAN_RANGES" "$(echo "$RET" | tr ',' ' ')"
 
+db_get udm-iptv/wan-dhcp
+replace_conf "$tmpconf" "IPTV_WAN_DHCP" "$RET"
+
 db_get udm-iptv/wan-dhcp-options
 replace_conf "$tmpconf" "IPTV_WAN_DHCP_OPTIONS" "$RET"
+
+db_get udm-iptv/wan-static-ip
+if [ -n "$RET" ]; then
+    replace_conf "$tmpconf" "IPTV_WAN_STATIC_IP" "$RET"
+else
+    remove_conf "$tmpconf" "IPTV_WAN_STATIC_IP"
+fi
 
 db_get udm-iptv/lan-interfaces
 replace_conf "$tmpconf" "IPTV_LAN_INTERFACES" "$(echo "$RET" | tr ',' ' ')"
