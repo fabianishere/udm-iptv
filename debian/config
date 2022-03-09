@@ -124,8 +124,8 @@ while true; do
         esac
         ;;
     2)  # Select configuration profile
-        db_subst udm-iptv/profile choices "Custom, $(_list_profiles | cut -d, -f 2  | sed -e 's/^[[:space:]]*//' | sort | sed ':a;N;s/\n/, /;ba')"
-        db_subst udm-iptv/profile choices_c "custom, $(_list_profiles | cut -d, -f 1  | sed -e 's/^[[:space:]]*//' | sort | sed ':a;N;s/\n/, /;ba')"
+        db_subst udm-iptv/profile choices "Custom, $(_list_profiles | sort | cut -d, -f 2 | sed -e 's/^[[:space:]]*//' | sed ':a;N;s/\n/, /;ba')"
+        db_subst udm-iptv/profile choices_c "custom, $(_list_profiles | sort | cut -d, -f 1 | sed -e 's/^[[:space:]]*//' | sed ':a;N;s/\n/, /;ba')"
         db_input high udm-iptv/profile || true
         ;;
     3)  # Perform profile configuration
