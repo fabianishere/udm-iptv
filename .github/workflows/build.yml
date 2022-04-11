@@ -18,7 +18,7 @@ jobs:
           cd udm-iptv
           debuild -uc -us --lintian-opts --profile debian
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
           if-no-files-found: error
