@@ -62,7 +62,7 @@ _network_setup() {
         fi
     fi
 
-    if [ "$IPTV_WAN_DHCP_ENABLE" != "false" ] && [ -n "$IPTV_WAN_STATIC_IP" ]; then
+    if [ "$IPTV_WAN_DHCP_ENABLE" = "false" ] && [ -n "$IPTV_WAN_STATIC_IP" ]; then
         ip -4 addr change "$IPTV_WAN_STATIC_IP" dev "$target"
     fi
 
