@@ -147,6 +147,7 @@ popular IPTV providers. Below is a list of supported IPTV providers:
 |        BT |   GB    | Yes                                                                                                         |
 |   Vivo SP |   BR    | Yes                                                                                                         |
 |   Telenor |   NO    | Yes                                                                                                         |
+|    PostTV |   LU    | Yes                                                                                                         |
 
 If your ISP is not supported, you may select the _Custom_ profile, which allows
 you manually configure the package to your needs. 
