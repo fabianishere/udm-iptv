@@ -77,6 +77,22 @@ _network_setup() {
     done
 }
 
+# Watch for network changes and re-apply the configuration
+_network_watch() {
+    if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
+        exit 0
+    fi
+
+    echo "Monitoring interface $IPTV_WAN_INTERFACE for changes"
+
+    # Monitor for changes on the WAN interface
+    ip monitor address dev "$IPTV_WAN_INTERFACE" | while read line; do
+        if echo "$line" | grep -q "Deleted"; then
+            _network_setup
+        fi
+    done & # Monitoring happens in background
+}
+
 # Tear down the network configuration
 _network_teardown() {
     # Delete the IPTables rules
@@ -147,6 +163,7 @@ case $1 in
     start)
         shift
         _network_setup
+        _network_watch
         _igmpproxy_setup
         _igmpproxy_start "$@"
         ;;
