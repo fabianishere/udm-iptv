@@ -1,3 +1,11 @@
+udm-iptv (2.1.1) stable; urgency=medium
+
+  * Fix static IP assignment.
+  * Re-apply configuration on network changes automatically.
+  * Add profile for PostTV.
+
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Tue, 12 Apr 2022 15:45:00 +0100
+
 udm-iptv (2.1.0) stable; urgency=medium
 
   * Make MAC address configurable through installer.
