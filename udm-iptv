@@ -13,11 +13,6 @@ IPTV_WAN_VLAN_INTERFACE="${IPTV_WAN_VLAN_INTERFACE:-iptv}"
 IPTV_WAN_DHCP_OPTIONS="${IPTV_WAN_DHCP_OPTIONS:-"-O staticroutes -V IPTV_RG"}"
 IPTV_LAN_RANGES="${IPTV_LAN_RANGES:-""}"
 
-# Use busybox if iproute2 is not installed
-if ! command -v ip > /dev/null 2>&1; then
-    alias ip="busybox ip"
-fi
-
 # Use busybox if udhcpc is not installed directly
 if ! command -v udhcpc > /dev/null 2>&1; then
     alias udhcpc="busybox udhcpc"

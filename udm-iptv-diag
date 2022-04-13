@@ -11,11 +11,6 @@
 # Load configuration
 . /etc/udm-iptv.conf
 
-# Use busybox if iproute2 is not installed
-if ! command -v ip > /dev/null 2>&1; then
-    alias ip="busybox ip"
-fi
-
 if [ "$IPTV_WAN_VLAN" -ne 0 ]; then
     target="$IPTV_WAN_VLAN_INTERFACE"
 else
