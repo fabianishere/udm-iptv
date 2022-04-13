@@ -91,7 +91,7 @@ if [ -e $CONFIGFILE ]; then
     db_set udm-iptv/wan-vlan-mac "$IPTV_WAN_VLAN_MAC"
 
     db_set udm-iptv/wan-ranges "$(echo "$IPTV_WAN_RANGES" | tr -s ' ' ',')"
-    db_set udm-iptv/wan-dhcp "$IPTV_WAN_DHCP_ENABLE"
+    db_set udm-iptv/wan-dhcp "$IPTV_WAN_DHCP"
     db_set udm-iptv/wan-dhcp-options "$IPTV_WAN_DHCP_OPTIONS"
     db_set udm-iptv/wan-static-ip "$IPTV_WAN_STATIC_IP"
 
