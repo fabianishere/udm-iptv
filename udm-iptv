@@ -75,7 +75,7 @@ _network_setup() {
 # Watch for network changes and re-apply the configuration
 _network_watch() {
     if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
-        exit 0
+        return
     fi
 
     echo "Monitoring interface $IPTV_WAN_INTERFACE for changes"
