@@ -186,14 +186,17 @@ updates, as a consequence of Ubiquiti's firmware flashing process ([#49](https:/
 You can modify the configuration of the service interactively using `dpkg-reconfigure -p medium udm-iptv`.
 See below for a reference of the available options to configure:
 
-| Environmental Variable  | Description                                                                                             | Default                            |
-|-------------------------|---------------------------------------------------------------------------------------------------------|------------------------------------|
-| IPTV_WAN_INTERFACE      | Interface on which IPTV traffic enters the router                                                       | eth8 (on UDM Pro) or eth4 (on UDM) |
-| IPTV_WAN_RANGES         | IP ranges from which the IPTV traffic originates (separated by spaces)                                  | 213.75.0.0/16 217.166.0.0/16       |
-| IPTV_WAN_VLAN           | ID of VLAN which carries IPTV traffic (use 0 if no VLAN is used)                                        | 4                                  |
-| IPTV_WAN_DHCP_OPTIONS   | [DHCP options](https://busybox.net/downloads/BusyBox.html#udhcpc) to send when requesting an IP address | -O staticroutes -V IPTV_RG         |
-| IPTV_LAN_INTERFACES     | Interfaces on which IPTV should be made available                                                       | br0                                |
-| IPTV_IGMPPROXY_DEBUG    | Enable debugging for igmpproxy                                                                          | false                              |
+| Environmental Variable | Description                                                                                             | Default                            |
+|------------------------|---------------------------------------------------------------------------------------------------------|------------------------------------|
+| IPTV_WAN_INTERFACE     | Interface on which IPTV traffic enters the router                                                       | eth8 (on UDM Pro) or eth4 (on UDM) |
+| IPTV_WAN_RANGES        | IP ranges from which the IPTV traffic originates (separated by spaces)                                  | 213.75.0.0/16 217.166.0.0/16       |
+| IPTV_WAN_VLAN          | ID of VLAN which carries IPTV traffic (use 0 if no VLAN is used)                                        | 4                                  |
+| IPTV_WAN_DHCP          | Boolean to indicate whether DHCP is enabled on the IPTV WAN (VLAN) interface                            | true                               |
+| IPTV_WAN_DHCP_OPTIONS  | [DHCP options](https://busybox.net/downloads/BusyBox.html#udhcpc) to send when requesting an IP address | -O staticroutes -V IPTV_RG         |
+| IPTV_WAN_STATIC_IP     | Static IP address to assign to the IPTV WAN (VLAN) interface (if DHCP is disabled)                      |                                    |
+| IPTV_WAN_MAC           | Custom MAC address to assign to the IPTV WAN VLAN interface                                             |                                    |
+| IPTV_LAN_INTERFACES    | Interfaces on which IPTV should be made available                                                       | br0                                |
+| IPTV_IGMPPROXY_DEBUG   | Enable debugging for igmpproxy                                                                          | false                              |
 
 The configuration is written to `/etc/udm-iptv.conf` (within UniFi OS).
 
