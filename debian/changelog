@@ -1,3 +1,10 @@
+udm-iptv (2.1.3) stable; urgency=high
+
+  * Fix script for users that do not use watch functionality
+  * Fix PostTV profile
+
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Sat, 16 Apr 2022 12:15:00 +0100
+
 udm-iptv (2.1.2) stable; urgency=medium
 
   * Fix DHCP disable option.

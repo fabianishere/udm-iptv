@@ -120,13 +120,13 @@ On the UniFi Dream Machine (Pro), use `unifi-os shell` to enter UniFi OS from
 within UbiOS.
 ```bash
 # Download udm-iptv package
-curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.1.2/udm-iptv_2.1.2_all.deb
+curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.1.3/udm-iptv_2.1.3_all.deb
 # Download a recent igmpproxy version
 curl -O -L http://ftp.debian.org/debian/pool/main/i/igmpproxy/igmpproxy_0.3-1_arm64.deb
 # Update APT sources and install dialog package for interactive install
 apt update && apt install dialog
 # Install udm-iptv and igmpproxy
-apt install ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.1.2_all.deb
+apt install ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.1.3_all.deb
 ```
 
 It may be possible that `apt` reports a warning after installation (like shown below),
@@ -206,8 +206,8 @@ of the package and installing it via `apt`. The service should automatically
 restart after upgrading.
 
 ```bash
-curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.1.2/udm-iptv_2.1.2_all.deb
-apt install ./udm-iptv_2.1.2_all.deb 
+curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.1.3/udm-iptv_2.1.3_all.deb
+apt install ./udm-iptv_2.1.3_all.deb 
 ```
 
 ### Removal
