@@ -129,6 +129,10 @@ apt update && apt install dialog
 apt install ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.1.2_all.deb
 ```
 
+It may be possible that `apt` reports a warning after installation (like shown below),
+but this has no effect on the installation process, so you can simply ignore it.
+> N: Download is performed unsandboxed as root as file '/root/igmpproxy_0.3-1_arm64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+
 This script will install the `udm-iptv` package onto your device.
 The installation process supports various pre-defined configuration profiles for
 popular IPTV providers. Below is a list of supported IPTV providers: 
