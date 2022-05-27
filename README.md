@@ -168,19 +168,28 @@ If you experience any issues while setting up the service, please visit the
 [Troubleshooting](#troubleshooting-and-known-issues) section.
 
 ### Ensuring Installation across Firmware Updates
-On certain UniFi devices, such as the UniFi Dream Machine SE, you may need to
-update the device configuration to have the installation of the udm-iptv 
-package persist across firmware updates. Update `/etc/default/ubnt-dpkg-cache` 
-as follows (_only_ if it exists):
+
+To ensure your installation remains persistent across firmware updates, you may
+need to perform some manual steps which are described below.
+
+Even so, **please remember to make a backup of your configuration before a 
+firmware update**. Changes in Ubiquiti's future firmware (flashing process)
+might potentially cause your configuration to be lost.
+
+#### UniFi Dream Machine (Pro)
+Custom packages on the UniFi Dream Machine (Pro) are re-installed after a firmware
+updates, but custom configuration is lost. To ensure your configuration remains
+persistent, move the configuration file to a persistent location and create a symlink:
 
 ```bash
-sed -e '/^DPKG_CACHE_UBNT_PKGS+=" udm-iptv igmpproxy dialog"/{:a;n;ba;q}' -e '$aDPKG_CACHE_UBNT_PKGS+=" udm-iptv igmpproxy dialog"' -i /etc/default/ubnt-dpkg-cache
+mv /etc/udm-iptv /mnt/persistent
+ln -sf /mnt/persistent/udm-iptv.conf /etc/udm-iptv.conf
 ```
+Make sure to re-create the symlink after a firmware upgrade.
 
-If you do not perform this step, you will need to re-install the package after a
-firmware update. Note that your configuration might be lost across firmware
-updates, as a consequence of Ubiquiti's firmware flashing process ([#49](https://github.com/fabianishere/udm-iptv/issues/49)).
-**Please make a backup of your configuration before a firmware update**.
+#### UniFi Dream Machine SE and UniFi Dream Router
+It is currently not possible to persist the installation across firmware updates
+(see #120). Your configuration should remain, so only re-installation is necessary.
 
 ### Configuration
 You can modify the configuration of the service interactively using `dpkg-reconfigure -p medium udm-iptv`.
