@@ -34,9 +34,11 @@ remove_conf() {
     fi
 }
 
+CONFIGFILE=/etc/udm-iptv.conf
 tmpconf=$(mktemp -t iptv.XXXX.conf)
+
 # Copy original configuration into temp file
-cp /etc/udm-iptv.conf "$tmpconf" || true
+cp "$CONFIGFILE" "$tmpconf" || true
 
 db_get udm-iptv/wan-interface
 replace_conf "$tmpconf" "IPTV_WAN_INTERFACE" "$RET"
@@ -88,7 +90,7 @@ db_get udm-iptv/igmpproxy-debug
 replace_conf "$tmpconf" "IPTV_IGMPPROXY_DEBUG" "$RET"
 
 # Replace file with updated configuration
-mv "$tmpconf" /etc/udm-iptv.conf
+mv "$tmpconf" "$(readlink -f "$CONFIGFILE")"
 
 #DEBHELPER#
 
