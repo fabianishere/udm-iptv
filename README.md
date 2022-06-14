@@ -182,7 +182,7 @@ updates, but custom configuration is lost. To ensure your configuration remains
 persistent, move the configuration file to a persistent location and create a symlink:
 
 ```bash
-mv /etc/udm-iptv /mnt/persistent
+mv /etc/udm-iptv.conf /mnt/persistent
 ln -sf /mnt/persistent/udm-iptv.conf /etc/udm-iptv.conf
 ```
 Make sure to re-create the symlink after a firmware upgrade.
