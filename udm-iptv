@@ -172,7 +172,7 @@ case $1 in
         ;;
 esac
 
-#Connects to a second vlan for VOD, needed for Vivo GVT/Zona 2. Made adaptado by @jotala
+#Connects to a second vlan for VOD, needed for Vivo GVT/Zona 2. Feito adaptado por @jotala
 
 if [ "$IPTV_VOD" = "true" ]; then
 	IPTV_VOD_WAN_VLAN_INTERFACE="${IPTV_VOD_WAN_VLAN_INTERFACE:-vod}"
