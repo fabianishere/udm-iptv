@@ -17,6 +17,7 @@ db_set udm-iptv/wan-dhcp false
 db_set udm-iptv/wan-static-ip "10.0.0.1/32"
 #db_set udm-iptv/vod="true"
 #db_set udm-iptv/vod-vlan=602
+#db_set udm-iptv/vod_wan_vlan_interface="vod"
 #db_set udm-iptv/vod-wan-ranges="172.28.0.0/14 177.16.0.0/16 200.161.71.0/24 201.0.52.0/23"
 #db_set udm-iptv/vod-wan-dhcp-options "-O staticroutes -V TEF_IPTV"
 
