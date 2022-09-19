@@ -171,3 +171,22 @@ case $1 in
         exit 1
         ;;
 esac
+
+#Connects to a second vlan for VOD, needed for Vivo GVT/Zona 2. Made adaptado by @jotala
+
+if [ "$IPTV_VOD" = "true" ]; then
+	IPTV_VOD_WAN_VLAN_INTERFACE="${IPTV_VOD_WAN_VLAN_INTERFACE:-vod}"
+	
+	ip link add link "$IPTV_WAN_INTERFACE" name "IPTV_VOD_WAN_VLAN_INTERFACE" type vlan id "$IPTV_VOD_VLAN"
+	
+	ip link set dev "$IPTV_VOD_WAN_VLAN_INTERFACE" up
+	
+	udhcpc -i "$IPTV_VOD_WAN_VLAN_INTERFACE" $IPTV_VOD_WAN_DHCP_OPTIONS
+	
+	for range in $IPTV_VOD_WAN_RANGES; do
+		# Only add the NAT rule if it does not yet exist
+		if ! iptables -C POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$IPTV_VOD_WAN_VLAN_INTERFACE" >/dev/null 2>&1; then
+			iptables -A POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$IPTV_VOD_WAN_VLAN_INTERFACE"
+		fi
+	done
+fi
