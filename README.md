@@ -149,7 +149,8 @@ popular IPTV providers. Below is a list of supported IPTV providers:
 |     Init7 |   CH    | Yes                                                                                                                 |
 |       MEO |   PT    | Yes                                                                                                                 |
 |        BT |   GB    | Yes                                                                                                                 |
-|   Vivo SP |   BR    | Yes - Tested with GPON TP-Link TX-6610                                                                                                                |
+|   Vivo SP |   BR    | Yes - Tested with GPON TP-Link TX-6610                                                                              |
+|  Vivo GVT |   BR    | Yes - [Manual configuration necessary](https://github.com/fabianishere/udm-iptv/issues/167#issuecomment-1244797462) |
 |   Telenor |   NO    | Yes                                                                                                                 |
 |    PostTV |   LU    | [Manual configuration necessary](https://github.com/fabianishere/udm-iptv/discussions/86#discussioncomment-2345968) |
 
