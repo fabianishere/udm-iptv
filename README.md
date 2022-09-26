@@ -116,22 +116,9 @@ multicast IPTV traffic between WAN and LAN.
 
 ### Installation
 SSH into your machine and execute the commands below in UniFi OS (not in UbiOS).
-On the UniFi Dream Machine (Pro), use `unifi-os shell` to enter UniFi OS from
-within UbiOS.
 ```bash
-# Download udm-iptv package
-curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.1.4/udm-iptv_2.1.4_all.deb
-# Download a recent igmpproxy version
-curl -O -L http://ftp.debian.org/debian/pool/main/i/igmpproxy/igmpproxy_0.3-1_arm64.deb
-# Update APT sources and install dialog package for interactive install
-apt update && apt install dialog
-# Install udm-iptv and igmpproxy
-apt install ./igmpproxy_0.3-1_arm64.deb ./udm-iptv_2.1.4_all.deb
+curl https://raw.githubusercontent.com/fabianishere/udm-iptv/master/install.sh -sSf | sh
 ```
-
-It may be possible that `apt` reports a warning after installation (like shown below),
-but this has no effect on the installation process, so you can simply ignore it.
-> N: Download is performed unsandboxed as root as file '/root/igmpproxy_0.3-1_arm64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
 
 This script will install the `udm-iptv` package onto your device.
 The installation process supports various pre-defined configuration profiles for
@@ -157,7 +144,7 @@ popular IPTV providers. Below is a list of supported IPTV providers:
 If your ISP is not supported, you may select the _Custom_ profile, which allows
 you manually configure the package to your needs. 
 We appreciate if you share the configuration so others can also benefit.
-See the [profiles](profiles/) directory for examples of existing configuration
+See the [profiles](profiles) directory for examples of existing configuration
 profiles.
 
 The package installs a service that is started during the
@@ -211,14 +198,7 @@ See below for a reference of the available options to configure:
 The configuration is written to `/etc/udm-iptv.conf` (within UniFi OS).
 
 ### Upgrading
-Upgrading the installation of udm-iptv is achieved by downloading a new version
-of the package and installing it via `apt`. The service should automatically
-restart after upgrading.
-
-```bash
-curl -O -L https://github.com/fabianishere/udm-iptv/releases/download/v2.1.4/udm-iptv_2.1.4_all.deb
-apt install ./udm-iptv_2.1.4_all.deb 
-```
+To upgrade `udm-iptv`, please re-run the installation script.
 
 ### Removal
 To fully remove an `udm-iptv` installation from your UniFi device, run the follow command:
@@ -230,48 +210,20 @@ In order to remove all configuration files as well, run the following command:
 apt purge dialog igmpproxy udm-iptv
 ```
 
-## Troubleshooting and Known Issues
+## Troubleshooting
 
 Below is a non-exhaustive list of issues that might occur while getting IPTV to
 run on your UniFi device, as well as troubleshooting steps. Please check these
-instructions before reporting an issue on issue tracker.
+instructions before opening a discussion.
 
-### Debugging DHCP
-
-Use the following steps to verify whether the IPTV container is obtaining an
-IP address from the IPTV network via DHCP:
-
-1. Verify that the VLAN interface has obtained an IP address:
-   ```bash
-   $ ip -4 addr show dev iptv
-   43: iptv@eth8: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default
-      inet XX.XX.XX.XX/22 brd XX.XX.XX.XX scope global iptv
-        valid_lft forever preferred_lft forever
-   ```
-2. Verify that you have obtained the routes from the DHCP server:
-   ```bash
-   $ ip route list
-   ...
-   XX.XX.XX.X/21 via XX.XX.XX.X dev iptv
-   ```
-
-### Debugging IGMP Proxy
-
-Use the following steps to debug `igmpproxy` if it is behaving strangely. 
-Make sure you are running inside UniFi OS.
-
-1. **Enabling debug logs**  
-   You can enable `igmpproxy` to report debug messages by setting `IPTV_IGMPPROXY_DEBUG`
-   to `true` in the configuration at `/etc/udm-iptv.conf` (within UniFi OS).
-   Then, restart the service as follows:
-   ```bash
-   systemctl restart udm-iptv
-   ```
-2. **Viewing debug logs**  
-   You may now view the debug logs of `igmpproxy` as follows:
-   ```bash
-   journalctl -u udm-iptv
-   ```
+1. **Check if your IPTV receiver is on the right VLAN**  
+   Your IPTV receiver might not be VLAN to which the IPTV traffic is forwarded.
+2. **Check if IPTV traffic is forwarded to the right VLAN**  
+   Make sure that you have configured `IPTV_LAN_INTERFACES` correctly to forward
+   to right interfaces (e.g., `br4` for VLAN 4).
+3. **Check if your issue has been reported already**  
+   Use the GitHub search functionality to check if your issue has already been
+   reported before.
 
 ### Getting Help or Reporting an Issue
 If your issues persist, you may seek help on our [Discussions](https://github.com/fabianishere/udm-iptv/discussions) page.
