@@ -12,11 +12,11 @@ the [following guide](https://github.com/basmeerman/unifi-usg-kpn).
 ## Contents
 
 1. [Global Design](#global-design)
-1. [Prerequisites](#prerequisites)
-1. [Setting up Internet Connection](#setting-up-internet-connection)
-1. [Configuring Internal LAN](#configuring-internal-lan)
-1. [Configuring Helper Tool](#configuring-helper-tool)
-1. [Troubleshooting and Known Issues](#troubleshooting-and-known-issues)
+2. [Prerequisites](#prerequisites)
+3. [Setting up Internet Connection](#setting-up-internet-connection)
+4. [Configuring Internal LAN](#configuring-internal-lan)
+5. [Configuring Helper Tool](#configuring-helper-tool)
+6. [Troubleshooting and Known Issues](#troubleshooting)
 
 ## Global Design
 
@@ -61,8 +61,8 @@ Make sure you check the following prerequisites before trying the other steps:
    [firmware version 1.11](https://community.ui.com/releases/UniFi-OS-Dream-Machines-1-11-0/eef95803-6976-499b-9169-bf6dfbbcc209). 
    If you for some reason cannot use firmware v1.11+, see [udm-kernel](https://github.com/fabianishere/udm-kernel)
    for a kernel that supports multicast routing for older firmware versions of the UDM/P.
-    - **UniFi Dream Machine Pro SE**: You need
-      [Early Access firmware 2.3.7+](https://community.ui.com/releases/UniFi-OS-Dream-Machine-SE-2-3-7/2cf1632b-bcf6-4b13-a61d-f74f1e51242c)
+    - **UniFi Dream Machine SE**: You need
+      [firmware version 2.3.7+](https://community.ui.com/releases/UniFi-OS-Dream-Machine-SE-2-3-7/2cf1632b-bcf6-4b13-a61d-f74f1e51242c)
       for multicast routing support.
     - **UniFi Dream Router**: Multicast routing is supported by the default 
       firmware.
@@ -153,7 +153,7 @@ necessary to route IPTV traffic. After installation, the service is automaticall
 started.
 
 If you experience any issues while setting up the service, please visit the
-[Troubleshooting](#troubleshooting-and-known-issues) section.
+[Troubleshooting](#troubleshooting) section.
 
 ### Ensuring Installation across Firmware Updates
 
