@@ -117,7 +117,7 @@ multicast IPTV traffic between WAN and LAN.
 ### Installation
 SSH into your machine and execute the commands below in UniFi OS (not in UbiOS).
 ```bash
-curl https://raw.githubusercontent.com/fabianishere/udm-iptv/master/install.sh -sSf | sh
+sh -c "$(curl https://raw.githubusercontent.com/fabianishere/udm-iptv/master/install.sh -sSf)"
 ```
 
 This script will install the `udm-iptv` package onto your device.
