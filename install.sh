@@ -43,7 +43,7 @@ apt-get update -q
 apt-get install -q -y dialog
 
 # Install udm-iptv and igmpproxy
-apt install -q -y "$dest/udm-iptv.deb" "$dest/igmpproxy.deb"
+apt-get install -q -y "$dest/igmpproxy.deb" "$dest/udm-iptv.deb"
 
 echo "Installation successful... You can find your configuration at /etc/udm-iptv.conf."
 echo
