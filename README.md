@@ -61,11 +61,8 @@ Make sure you check the following prerequisites before trying the other steps:
    [firmware version 1.11](https://community.ui.com/releases/UniFi-OS-Dream-Machines-1-11-0/eef95803-6976-499b-9169-bf6dfbbcc209). 
    If you for some reason cannot use firmware v1.11+, see [udm-kernel](https://github.com/fabianishere/udm-kernel)
    for a kernel that supports multicast routing for older firmware versions of the UDM/P.
-    - **UniFi Dream Machine SE**: You need
-      [firmware version 2.3.7+](https://community.ui.com/releases/UniFi-OS-Dream-Machine-SE-2-3-7/2cf1632b-bcf6-4b13-a61d-f74f1e51242c)
-      for multicast routing support.
-    - **UniFi Dream Router**: Multicast routing is supported by the default 
-      firmware.
+    - **UniFi Dream Machine SE**: You need firmware version 2.3.7+ for multicast routing support.
+    - **UniFi Dream Router**: Multicast routing is supported by the default firmware.
 2. The switches in-between the IPTV decoder and the UniFi device should have IGMP
    snooping enabled. They do not need to be from Ubiquiti necessarily.
 3. The FTTP NTU (or any other type of modem) of your ISP must be connected to
