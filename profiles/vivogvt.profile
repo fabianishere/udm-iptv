@@ -15,11 +15,11 @@ db_set udm-iptv/wan-vlan 4000
 db_set udm-iptv/wan-ranges "0.0.0.0/0"
 db_set udm-iptv/wan-dhcp false
 db_set udm-iptv/wan-static-ip "10.0.0.1/32"
-#db_set udm-iptv/vod="true"
-#db_set udm-iptv/vod-vlan=602
-#db_set udm-iptv/vod_wan_vlan_interface="vod"
-#db_set udm-iptv/vod-wan-ranges="172.28.0.0/14 177.16.0.0/16 200.161.71.0/24 201.0.52.0/23"
-#db_set udm-iptv/vod-wan-dhcp-options "-O staticroutes -V TEF_IPTV"
+db_set udm-iptv/vod="true"
+db_set udm-iptv/vod-vlan=602
+db_set udm-iptv/vod_wan_vlan_interface="vod"
+db_set udm-iptv/vod-wan-ranges="172.28.0.0/14 177.16.0.0/16 200.161.71.0/24 201.0.52.0/23"
+db_set udm-iptv/vod-wan-dhcp-options="-O staticroutes -V TEF_IPTV"
 
 db_subst udm-iptv/profile-note note "Set DNS servers to 177.16.30.67 and 177.16.30.7 for internal IPTV network"
 db_input medium udm-iptv/profile-note || true
