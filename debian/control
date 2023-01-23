@@ -10,7 +10,8 @@ Homepage: https://github.com/fabianishere/udm-iptv
 
 Package: udm-iptv
 Architecture: all
-Depends: busybox | busybox-static, iproute2, iptables, igmpproxy (>= 0.2), ${misc:Depends}
+Depends: busybox | busybox-static, iproute2, iptables, ${misc:Depends}
+Recommend: igmpproxy (>= 0.2)
 Section: net
 Priority: optional
 Description: Helper tool for configuring IPTV on the UniFi Dream Machine (Pro)

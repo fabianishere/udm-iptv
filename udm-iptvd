@@ -127,10 +127,47 @@ _igmpproxy_build_config() {
     done
 }
 
+# Build the configuration needed by IMProxy
+_igmpproxy_build_config_improxy() {
+    echo "# improxy configuration for udm-iptv"
+    if [ "$IPTV_IGMPPROXY_IGMP_VERSION" = 3 ]; then
+        echo "igmp enable version 3"
+    else
+        echo "igmp enable version 2"
+    fi
+
+    echo "mld disable"
+
+    local target
+    if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
+        target="$IPTV_WAN_VLAN_INTERFACE"
+    else
+        target="$IPTV_WAN_INTERFACE"
+    fi
+
+    echo "upstream $target"
+
+    # Configure the upstream interfaces
+    for path in /sys/class/net/*; do
+        local interface
+        interface=$(basename "$path")
+        if echo "$IPTV_LAN_INTERFACES" | grep -w -q "$interface"; then
+            echo "downstream $interface"
+        fi
+    done
+}
+
 # Configure IGMP Proxy to bridge multicast traffic
 _igmpproxy_setup() {
-    echo "Setting up igmpproxy"
-    _igmpproxy_build_config >/var/run/igmpproxy.iptv.conf
+    echo "Setting up IGMP Proxy"
+
+    if [ "$IPTV_IGMPPROXY_PROGRAM" = "improxy" ]; then
+        echo "Using improxy..."
+        _igmpproxy_build_config_improxy > /var/run/igmpproxy.iptv.conf
+    else
+        echo "Using igmpproxy..."
+        _igmpproxy_build_config > /var/run/igmpproxy.iptv.conf
+    fi
 }
 
 # Tear down the IGMP Proxy configuration
@@ -140,14 +177,35 @@ _igmpproxy_teardown() {
 
 # Start the igmpproxy service
 _igmpproxy_start() {
-    echo "Starting igmpproxy"
+    echo "Starting IGMP Proxy"
     args=""
     if [ -n "$IPTV_IGMPPROXY_DEBUG" ] && [ "$IPTV_IGMPPROXY_DEBUG" != "false" ]; then
-        args="-d -v"
+        if [ "$IPTV_IGMPPROXY_PROGRAM" = "improxy" ]; then
+            args="-d -5"
+        else
+            args="-d -v"
+        fi
     fi
-    # shellcheck disable=SC2086
-    exec igmpproxy -n $args "$@" /var/run/igmpproxy.iptv.conf
+
+    if [ "$IPTV_IGMPPROXY_PROGRAM" = "improxy" ]; then
+        if ! command -v improxy > /dev/null 2>&1; then
+            echo "error: improxy not installed..."
+            exit 1
+        fi
+
+        # shellcheck disable=SC2086
+        exec improxy $args "$@" -c /var/run/igmpproxy.iptv.conf
+    else
+        if ! command -v igmpproxy > /dev/null 2>&1; then
+            echo "error: igmpproxy not installed..."
+            exit 1
+        fi
+
+        # shellcheck disable=SC2086
+        exec igmpproxy -n $args "$@" /var/run/igmpproxy.iptv.conf
+    fi
 }
+
 
 # Check if the user passed any argument
 if [ $# -eq 0 ]; then

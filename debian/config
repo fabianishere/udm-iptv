@@ -97,8 +97,10 @@ if [ -e $CONFIGFILE ]; then
 
     db_set udm-iptv/lan-interfaces "$(echo "$IPTV_LAN_INTERFACES" | tr -s ' ' ',')"
 
+    db_set udm-iptv/igmpproxy-program "$IPTV_IGMPPROXY_PROGRAM"
     db_set udm-iptv/igmpproxy-quickleave "$([ -n "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" ] && [ "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" != "false" ] && echo "false" || echo "true")"
     db_set udm-iptv/igmpproxy-debug "$IPTV_IGMPPROXY_DEBUG"
+    db_set udm-iptv/igmpproxy-igmp-version "$IPTV_IGMPPROXY_IGMP_VERSION"
 fi
 
 # Facilitate backup capability per debconf-devel(7)
@@ -111,12 +113,12 @@ while true; do
         ;;
     1)  # Configure WAN interface
         case "$board" in
-            UDMPRO|UDMPROSE)
+            UDMPRO|UDMPROSE|UDMSE)
                 db_subst udm-iptv/wan-port choices "WAN 1 (RJ45), WAN 2 (SFP+)"
                 db_subst udm-iptv/wan-port choices_c "eth8, eth9"
                 db_input high udm-iptv/wan-port || true
                 ;;
-            UDM|UDMSE|UDR)
+            UDM|UDR)
                 db_set udm-iptv/wan-port eth4
                 ;;
             *)
@@ -138,13 +140,24 @@ while true; do
         db_subst udm-iptv/lan-interfaces choices_c "$(find /sys/class/net -name "br*" -exec basename {} \; | sort | sed ':a;N;s/\n/, /;ba')"
         db_input high udm-iptv/lan-interfaces || true
         ;;
-    5)  # Configure igmpproxy
-        db_beginblock
-        db_input low udm-iptv/igmpproxy-quickleave || true
-        db_input medium udm-iptv/igmpproxy-debug || true
-        db_endblock
+    5)  # Configure igmpproxy program
+        db_input low udm-iptv/igmpproxy-program || true
         ;;
-    6)  # Complete configuration
+    6)  # Configure igmpproxy
+        db_get udm-iptv/igmpproxy-program
+        if [ "$RET" = "improxy" ]; then
+            db_beginblock
+            db_input medium udm-iptv/igmpproxy-igmp-version || true
+            db_input medium udm-iptv/igmpproxy-debug || true
+            db_endblock
+        else
+            db_beginblock
+            db_input low udm-iptv/igmpproxy-quickleave || true
+            db_input medium udm-iptv/igmpproxy-debug || true
+            db_endblock
+        fi
+        ;;
+    7)  # Complete configuration
         exit 0
         ;;
     *)  # unknown state

@@ -79,6 +79,10 @@ fi
 db_get udm-iptv/lan-interfaces
 replace_conf "$tmpconf" "IPTV_LAN_INTERFACES" "$(echo "$RET" | tr ',' ' ')"
 
+
+db_get udm-iptv/igmpproxy-program
+replace_conf "$tmpconf" "IPTV_IGMPPROXY_PROGRAM" "$RET"
+
 db_get udm-iptv/igmpproxy-quickleave
 value="false"
 if [ "$RET" = "false" ]; then
@@ -88,6 +92,9 @@ replace_conf "$tmpconf" "IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" "$value"
 
 db_get udm-iptv/igmpproxy-debug
 replace_conf "$tmpconf" "IPTV_IGMPPROXY_DEBUG" "$RET"
+
+db_get udm-iptv/igmpproxy-igmp-version
+replace_conf "$tmpconf" "IPTV_IGMPPROXY_IGMP_VERSION" "$RET"
 
 # Replace file with updated configuration
 mv "$tmpconf" "$(readlink -f "$CONFIGFILE")"

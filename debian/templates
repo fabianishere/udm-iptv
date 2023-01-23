@@ -65,6 +65,12 @@ Choices: ${choices}
 Choices-C: ${choices_c}
 Default: br0
 
+Template: udm-iptv/igmpproxy-program
+Description: IGMP Proxy implementation:
+Type: select
+Choices: igmpproxy, improxy
+Default: igmpproxy
+
 Template: udm-iptv/igmpproxy-quickleave
 Description: Enable quickleave for igmpproxy?
 Type: boolean
@@ -74,3 +80,10 @@ Template: udm-iptv/igmpproxy-debug
 Description: Enable igmpproxy debugging?
 Type: boolean
 Default: false
+
+Template: udm-iptv/igmpproxy-igmp-version
+Description: IGMP version:
+Type: select
+Choices: IGMPv2, IGMPv3
+Choices-C: 2, 3
+Default: 2
