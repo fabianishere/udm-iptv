@@ -70,6 +70,11 @@ _network_setup() {
             iptables -A POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target"
         fi
     done
+
+    echo "Creating static routes (if necessary)"
+    for range in $IPTV_STATIC_ROUTES; do
+        ip route add "$range" dev "$target"
+    done
 }
 
 # Watch for network changes and re-apply the configuration
