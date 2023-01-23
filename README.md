@@ -56,13 +56,7 @@ the [following guide](https://github.com/basmeerman/unifi-usg-kpn).
 Make sure you check the following prerequisites before trying the other steps:
 
 1. The kernel on your UniFi device must support multicast routing
-   in order to support IPTV:
-    - **UniFi Dream Machine (Pro)**: Multicast routing is supported natively in the stock kernel since
-   [firmware version 1.11](https://community.ui.com/releases/UniFi-OS-Dream-Machines-1-11-0/eef95803-6976-499b-9169-bf6dfbbcc209). 
-   If you for some reason cannot use firmware v1.11+, see [udm-kernel](https://github.com/fabianishere/udm-kernel)
-   for a kernel that supports multicast routing for older firmware versions of the UDM/P.
-    - **UniFi Dream Machine SE**: You need firmware version 2.3.7+ for multicast routing support.
-    - **UniFi Dream Router**: Multicast routing is supported by the default firmware.
+   in order to support IPTV. Please upgrade to the latest firmware.
 2. The switches in-between the IPTV decoder and the UniFi device should have IGMP
    snooping enabled. They do not need to be from Ubiquiti necessarily.
 3. The FTTP NTU (or any other type of modem) of your ISP must be connected to
@@ -218,7 +212,10 @@ instructions before opening a discussion.
 2. **Check if IPTV traffic is forwarded to the right VLAN**  
    Make sure that you have configured `IPTV_LAN_INTERFACES` correctly to forward
    to right interfaces (e.g., `br4` for VLAN 4).
-3. **Check if your issue has been reported already**  
+3. **Check if your kernel supports multicast routing**  
+   If `MRT_INIT failed; Errno(92): Protocol not available` appears in 
+   diagnostics, your kernel does not support multicast routing.
+4. **Check if your issue has been reported already**  
    Use the GitHub search functionality to check if your issue has already been
    reported before.
 
