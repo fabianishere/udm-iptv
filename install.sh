@@ -49,4 +49,4 @@ echo "Installation successful... You can find your configuration at /etc/udm-ipt
 echo
 echo "Use the following command to reconfigure the script:"
 echo
-printf "\t dpkg-reconfigure -p medium udm-iptv\n"
+printf "\t udm-iptv reconfigure\n"

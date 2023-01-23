@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=simple
 EnvironmentFile=/etc/udm-iptv.conf
-ExecStart=/usr/lib/udm-iptv/udm-iptv start
-ExecStop=/usr/lib/udm-iptv/udm-iptv stop
+ExecStart=/usr/lib/udm-iptv/udm-iptvd start
+ExecStop=/usr/lib/udm-iptv/udm-iptvd stop
 Restart=on-failure
 RestartSec=5s
 

@@ -1,173 +1,130 @@
 #!/bin/sh
-# Script for managing the udm-iptv service
+# Script for managing the udm-iptv installation.
 #
-# Copyright (C) 2021 Fabian Mastenbroek.
+# Copyright (C) 2023 Fabian Mastenbroek.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
-# Default options
-IPTV_WAN_VLAN_INTERFACE="${IPTV_WAN_VLAN_INTERFACE:-iptv}"
-IPTV_WAN_DHCP_OPTIONS="${IPTV_WAN_DHCP_OPTIONS:-"-O staticroutes -V IPTV_RG"}"
-IPTV_LAN_RANGES="${IPTV_LAN_RANGES:-""}"
+set -eu
 
-# Use busybox if udhcpc is not installed directly
-if ! command -v udhcpc > /dev/null 2>&1; then
-    alias udhcpc="busybox udhcpc"
-fi
-
-# Setup the network, creating the IPTV VLAN interface if necessary
-# and obtaining an IP address for the interface.
-_network_setup() {
-    local target
-    target="$IPTV_WAN_INTERFACE"
-
-    # Make sure we obtain IP address for VLAN interface
-    if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
-        target="$IPTV_WAN_VLAN_INTERFACE"
-
-        if ! ip link show "$IPTV_WAN_INTERFACE" >/dev/null; then
-            echo "Device $IPTV_WAN_INTERFACE for $IPTV_WAN_VLAN_INTERFACE does not exist"
-            exit 1
-        fi
-
-        # Delete existing VLAN interface
-        if [ -e /sys/class/net/"$IPTV_WAN_VLAN_INTERFACE" ]; then
-            echo "Device $IPTV_WAN_VLAN_INTERFACE already exists.. Deleting device"
-            ip link delete dev "$IPTV_WAN_VLAN_INTERFACE"
-        fi
-
-        ip link add link "$IPTV_WAN_INTERFACE" name "$IPTV_WAN_VLAN_INTERFACE" type vlan id "$IPTV_WAN_VLAN"
-
-        # Specify custom MAC address for VLAN interface
-        if [ -n "$IPTV_WAN_VLAN_MAC" ]; then
-            ip link set dev "$IPTV_WAN_VLAN_INTERFACE" address "$IPTV_WAN_VLAN_MAC"
-        fi
-
-        # Bring VLAN interface up
-        ip link set dev "$IPTV_WAN_VLAN_INTERFACE" up
-
-        if [ "$IPTV_WAN_DHCP" != "false" ]; then
-            echo "Obtaining IP address for VLAN interface"
-
-            # Obtain IP address for VLAN interface
-            udhcpc -b -R -p /var/run/udhcpc."$IPTV_WAN_VLAN_INTERFACE".pid -s "$(dirname "$0")"/udhcpc.hook -i "$IPTV_WAN_VLAN_INTERFACE" $IPTV_WAN_DHCP_OPTIONS
-        fi
-    fi
-
-    if [ "$IPTV_WAN_DHCP" = "false" ] && [ -n "$IPTV_WAN_STATIC_IP" ]; then
-        ip -4 addr change "$IPTV_WAN_STATIC_IP" dev "$target"
-    fi
-
-    echo "NATing IPTV network ranges (if necessary)"
-
-    # NAT the IPTV ranges
-    for range in $IPTV_WAN_RANGES; do
-        # Only add the NAT rule if it does not yet exist
-        if ! iptables -C POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target" >/dev/null 2>&1; then
-            iptables -A POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target"
-        fi
-    done
+# (Re)configure the udm-iptv installation
+udm_iptv_configure()
+{
+    dpkg-reconfigure -p low udm-iptv
 }
 
-# Watch for network changes and re-apply the configuration
-_network_watch() {
-    if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
-        return
-    fi
-
-    echo "Monitoring interface $IPTV_WAN_INTERFACE for changes"
-
-    # Monitor for changes on the WAN interface
-    ip monitor address dev "$IPTV_WAN_INTERFACE" | while read line; do
-        if echo "$line" | grep -q "Deleted"; then
-            _network_setup
-        fi
-    done & # Monitoring happens in background
+# Upgrade udm-iptv installation to latest version
+udm_iptv_upgrade()
+{
+    echo "Running udm-iptv installer..."
+    sh -c "$(curl https://raw.githubusercontent.com/fabianishere/udm-iptv/master/install.sh -sSf)"
 }
 
-# Tear down the network configuration
-_network_teardown() {
-    # Delete the IPTables rules
-    for range in $IPTV_WAN_RANGES; do
-        iptables -D POSTROUTING -t nat -d "$range" -j MASQUERADE -o "$target" >/dev/null 2>&1
-    done
+# Remove the udm-iptv installation from the system
+udm_iptv_uninstall()
+{
+    apt-get remove -y dialog igmpproxy udm-iptv
 }
 
-# Build the configuration needed by IGMP Proxy
-_igmpproxy_build_config() {
-    echo "# igmpproxy configuration for udm-iptv"
-    if [ -z "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" ] || [ "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" = "false" ]; then
-        echo "quickleave"
+# Restart the udm-iptv daemon via systemd
+udm_iptv_restart()
+{
+    systemctl restart udm-iptv
+}
+
+# Print diagnostics for troubleshooting
+udm_iptv_diagnose()
+{
+    if ! [ -e /etc/udm-iptv.conf ] ; then
+        echo "error: The configuration for udm-iptv is not found."
+        echo "Please reconfigure your udm-iptv installation:"
+        echo "    udm-iptv reconfigure"
+        exit 1
     fi
 
-    local target
-    if [ "$IPTV_WAN_VLAN" -gt 0 ]; then
+    # Load configuration
+    . /etc/udm-iptv.conf
+
+    if [ "$IPTV_WAN_VLAN" -ne 0 ]; then
         target="$IPTV_WAN_VLAN_INTERFACE"
     else
         target="$IPTV_WAN_INTERFACE"
     fi
 
-    echo "phyint $target upstream  ratelimit 0  threshold 1"
-    for range in $IPTV_LAN_RANGES $IPTV_WAN_RANGES; do
-        echo "  altnet $range"
-    done
-
-    # Configure the igmpproxy interfaces
-    for path in /sys/class/net/*; do
-        local interface
-        interface=$(basename "$path")
-        if echo "$IPTV_LAN_INTERFACES" | grep -w -q "$interface"; then
-            echo "phyint $interface downstream  ratelimit 0  threshold 1"
-        elif [ "$interface" != "lo" ] && [ "$interface" != "$target" ]; then
-            echo "phyint $interface disabled"
-        fi
-    done
-}
-
-# Configure IGMP Proxy to bridge multicast traffic
-_igmpproxy_setup() {
-    echo "Setting up igmpproxy"
-    _igmpproxy_build_config >/var/run/igmpproxy.iptv.conf
-}
-
-# Tear down the IGMP Proxy configuration
-_igmpproxy_teardown() {
-    rm -f /var/run/igmpproxy.iptv.conf
-}
-
-# Start the igmpproxy service
-_igmpproxy_start() {
-    echo "Starting igmpproxy"
-    args=""
-    if [ -n "$IPTV_IGMPPROXY_DEBUG" ] && [ "$IPTV_IGMPPROXY_DEBUG" != "false" ]; then
-        args="-d -v"
+    echo "Please share the following output with the developers:"
+    echo "=== Configuration ==="
+    echo "WAN Interface: $IPTV_WAN_INTERFACE"
+    echo "WAN VLAN: $IPTV_WAN_VLAN (dev $IPTV_WAN_VLAN_INTERFACE$([ -n "${IPTV_WAN_VLAN_MAC:-}" ] && echo " mac $IPTV_WAN_VLAN_MAC"))"
+    echo "WAN DHCP: $([ -n "${IPTV_WAN_DHCP:-}" ] && echo "$IPTV_WAN_DHCP" || echo "true") (options \"$IPTV_WAN_DHCP_OPTIONS\")"
+    if [ -n "${IPTV_WAN_STATIC_IP:-}" ]; then
+        echo "WAN Static IP: $IPTV_WAN_STATIC_IP"
     fi
-    # shellcheck disable=SC2086
-    exec igmpproxy -n $args "$@" /var/run/igmpproxy.iptv.conf
+    echo "WAN Ranges: $IPTV_WAN_RANGES"
+    echo "LAN Interfaces: $IPTV_LAN_INTERFACES"
+    echo "IGMP Proxy quickleave disabled: $IPTV_IGMPPROXY_DISABLE_QUICKLEAVE"
+    echo "IGMP Proxy debug: $IPTV_IGMPPROXY_DEBUG"
+
+    echo "=== IP Link and Route ==="
+    ip -4 addr show dev "$target" || true
+    ip route show dev "$target" || true
+
+    echo "=== Service Logs ==="
+    journalctl -u udm-iptv | tail
+}
+
+# Print the help message of this program.
+udm_iptv_usage()
+{
+	cat << EOF
+Usage: $0 [OPTIONS...] COMMAND [ARGS]...
+Helper tool for routed IPTV on the UniFi Dream Machine (Pro/SE).
+Commands:
+  configure         Re-configure the udm-iptv installation
+  upgrade           Upgrade the udm-iptv installation to the latest version
+  uninstall         Remove udm-iptv from the system
+  restart           Restart the udm-iptv daemon
+  diagnose          Diagnose issues with the current configuration
+Options:
+  -h, --help    Show this message and exit
+EOF
 }
 
 # Check if the user passed any argument
 if [ $# -eq 0 ]; then
+    udm_iptv_usage
     exit 1
 fi
 
 case $1 in
-    start)
-        shift
-        _network_setup
-        _network_watch
-        _igmpproxy_setup
-        _igmpproxy_start "$@"
+    -h|--help)
+        udm_iptv_usage
+        exit 0
         ;;
-    stop)
+    configure|reconfigure)
         shift
-        _network_teardown
-        _igmpproxy_teardown
+        udm_iptv_configure "$@"
+        ;;
+    upgrade)
+        shift
+        udm_iptv_upgrade "$@"
+        ;;
+    uninstall)
+        shift
+        udm_iptv_uninstall "$@"
+        ;;
+    restart)
+        shift
+        udm_iptv_restart "$@"
+        ;;
+    diag|diagnose)
+        shift
+        udm_iptv_diagnose "$@"
         ;;
     *)
+        udm_iptv_usage
         exit 1
         ;;
 esac

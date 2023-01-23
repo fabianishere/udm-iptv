@@ -8,31 +8,4 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
-# Load configuration
-. /etc/udm-iptv.conf
-
-if [ "$IPTV_WAN_VLAN" -ne 0 ]; then
-    target="$IPTV_WAN_VLAN_INTERFACE"
-else
-    target="$IPTV_WAN_INTERFACE"
-fi
-
-echo "Please share the following output with the developers:"
-echo "=== Configuration ==="
-echo "WAN Interface: $IPTV_WAN_INTERFACE"
-echo "WAN VLAN: $IPTV_WAN_VLAN (dev $IPTV_WAN_VLAN_INTERFACE$([ -n "$IPTV_WAN_VLAN_MAC" ] && echo " mac $IPTV_WAN_VLAN_MAC"))"
-echo "WAN DHCP: $([ -n "$IPTV_WAN_DHCP" ] && echo "$IPTV_WAN_DHCP" || echo "true") (options \"$IPTV_WAN_DHCP_OPTIONS\")"
-if [ -n "$IPTV_WAN_STATIC_IP" ]; then
-    echo "WAN Static IP: $IPTV_WAN_STATIC_IP"
-fi
-echo "WAN Ranges: $IPTV_WAN_RANGES"
-echo "LAN Interfaces: $IPTV_LAN_INTERFACES"
-echo "IGMP Proxy quickleave disabled: $IPTV_IGMPPROXY_DISABLE_QUICKLEAVE"
-echo "IGMP Proxy debug: $IPTV_IGMPPROXY_DEBUG"
-
-echo "=== IP Link and Route ==="
-ip -4 addr show dev "$target"
-ip route show dev "$target"
-
-echo "=== Service Logs ==="
-journalctl -u udm-iptv | tail
+exec udm-iptv diagnose

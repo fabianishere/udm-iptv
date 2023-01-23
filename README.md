@@ -146,7 +146,7 @@ started.
 If you experience any issues while setting up the service, please visit the
 [Troubleshooting](#troubleshooting) section.
 
-### Ensuring Installation across Firmware Updates
+### Installation across Firmware Updates
 
 To ensure your installation remains working across firmware updates, you may
 need to perform some manual steps which are described below.
@@ -174,34 +174,37 @@ It is currently not possible to persist the installation across firmware updates
 (see [#120](https://github.com/fabianishere/udm-iptv/issues/120)). Your configuration should remain, so only re-installation is necessary.
 
 ### Configuration
-You can modify the configuration of the service interactively using `dpkg-reconfigure -p medium udm-iptv`.
+You can modify the configuration of the service interactively as follows:
+```bash
+udm-iptv configure
+```
 See below for a reference of the available options to configure:
 
-| Environmental Variable | Description                                                                                             | Default                            |
-|------------------------|---------------------------------------------------------------------------------------------------------|------------------------------------|
-| IPTV_WAN_INTERFACE     | Interface on which IPTV traffic enters the router                                                       | eth8 (on UDM Pro) or eth4 (on UDM) |
-| IPTV_WAN_RANGES        | IP ranges from which the IPTV traffic originates (separated by spaces)                                  | 213.75.0.0/16 217.166.0.0/16       |
-| IPTV_WAN_VLAN          | ID of VLAN which carries IPTV traffic (use 0 if no VLAN is used)                                        | 4                                  |
-| IPTV_WAN_DHCP          | Boolean to indicate whether DHCP is enabled on the IPTV WAN (VLAN) interface                            | true                               |
-| IPTV_WAN_DHCP_OPTIONS  | [DHCP options](https://busybox.net/downloads/BusyBox.html#udhcpc) to send when requesting an IP address | -O staticroutes -V IPTV_RG         |
-| IPTV_WAN_STATIC_IP     | Static IP address to assign to the IPTV WAN (VLAN) interface (if DHCP is disabled)                      |                                    |
-| IPTV_WAN_MAC           | Custom MAC address to assign to the IPTV WAN VLAN interface                                             |                                    |
-| IPTV_LAN_INTERFACES    | Interfaces on which IPTV should be made available                                                       | br0                                |
-| IPTV_IGMPPROXY_DEBUG   | Enable debugging for igmpproxy                                                                          | false                              |
+| Option                | Description                                                                                             |
+|-----------------------|---------------------------------------------------------------------------------------------------------|
+| IPTV_WAN_INTERFACE    | Interface on which IPTV traffic enters the router                                                       |
+| IPTV_WAN_RANGES       | IP ranges from which the IPTV traffic originates (separated by spaces)                                  |
+| IPTV_WAN_VLAN         | ID of VLAN which carries IPTV traffic (use 0 if no VLAN is used)                                        |
+| IPTV_WAN_DHCP         | Boolean to indicate whether DHCP is enabled on the IPTV WAN (VLAN) interface                            |
+| IPTV_WAN_DHCP_OPTIONS | [DHCP options](https://busybox.net/downloads/BusyBox.html#udhcpc) to send when requesting an IP address |
+| IPTV_WAN_STATIC_IP    | Static IP address to assign to the IPTV WAN (VLAN) interface (if DHCP is disabled)                      |
+| IPTV_WAN_MAC          | Custom MAC address to assign to the IPTV WAN VLAN interface                                             |
+| IPTV_LAN_INTERFACES   | Interfaces on which IPTV should be made available                                                       |
+| IPTV_IGMPPROXY_DEBUG  | Enable debugging for igmpproxy                                                                          |
 
 The configuration is written to `/etc/udm-iptv.conf` (within UniFi OS).
 
 ### Upgrading
-To upgrade `udm-iptv`, please re-run the installation script.
+Use the following command to upgrade `udm-iptv`:
+```bash
+udm-iptv upgrade
+```
+If that command does not exist, please re-run the installation script.
 
 ### Removal
 To fully remove an `udm-iptv` installation from your UniFi device, run the follow command:
 ```bash
-apt remove dialog igmpproxy udm-iptv
-```
-In order to remove all configuration files as well, run the following command:
-```bash
-apt purge dialog igmpproxy udm-iptv
+udm-iptv uninstall
 ```
 
 ## Troubleshooting
@@ -227,7 +230,7 @@ only for bugs or feature requests related to the project (no configuration-relat
 When opening a discussion or reporting an issue, **please share the name of your
 ISP as well as the diagnostics reported by our diagnostic tool**:
 ```bash
-udm-iptv-diag
+udm-iptv diagnose
 ```
 
 ## Contributing
