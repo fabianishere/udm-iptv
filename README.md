@@ -98,12 +98,6 @@ additional DHCP options. You can add these DHCP options as follows:
    order to reduce interference of other devices on the network.
 3. Enable **Advanced Configuration > IGMP Snooping**, so IPTV traffic is only
    sent to devices that should receive it.
-4. Go to **DHCP > Custom DHCP Option** and add the following options:
-
-   | Name       | Code | Type       | Value               |
-   |------------|:----:|------------|---------------------|
-   | IPTV-Class |  60  | Text       | IPTV_RG             |
-
 
 ## Configuring Helper Tool
 
