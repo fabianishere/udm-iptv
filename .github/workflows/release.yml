@@ -49,11 +49,10 @@ jobs:
           ref="${{ github.ref}}"
           release_name=${ref#"refs/tags/"}
           echo "release=$release_name" >> $GITHUB_OUTPUT
-          changelog=$(dpkg-parsechangelog -c 1 -l debian/changelog)
-          changelog="${changelog//'%'/'%25'}"
-          changelog="${changelog//$'\n'/'%0A'}"
-          changelog="${changelog//$'\r'/'%0D'}"
-          echo "changelog=<<EOF\n$changelog\nEOF" >> $GITHUB_OUTPUT
+          delimiter="$(openssl rand -hex 8)"
+          echo "changelog<<${delimiter}" >> $GITHUB_OUTPUT
+          dpkg-parsechangelog -c 1 -l debian/changelog >> $GITHUB_OUTPUT
+          echo "${delimiter}" >> $GITHUB_OUTPUT
       - name: Create Release
         uses: softprops/action-gh-release@v1
         env:
