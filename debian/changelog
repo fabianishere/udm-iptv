@@ -1,3 +1,10 @@
+udm-iptv (3.0.1) stable; urgency=medium
+
+  * Fix debugging option for improxy
+  * Fix release workflow
+
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Wed, 1 Feb 2022 18:00:00 +0000
+
 udm-iptv (3.0.0) stable; urgency=medium
 
   * Add helper script for managing the udm-iptv installation
