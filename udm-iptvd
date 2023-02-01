@@ -186,7 +186,7 @@ _igmpproxy_start() {
     args=""
     if [ -n "$IPTV_IGMPPROXY_DEBUG" ] && [ "$IPTV_IGMPPROXY_DEBUG" != "false" ]; then
         if [ "$IPTV_IGMPPROXY_PROGRAM" = "improxy" ]; then
-            args="-d -5"
+            args="-d 5"
         else
             args="-d -v"
         fi
