@@ -142,30 +142,10 @@ If you experience any issues while setting up the service, please visit the
 
 ### Installation across Firmware Updates
 
-To ensure your installation remains working across firmware updates, you may
-need to perform some manual steps which are described below.
-
-**Please remember to make a backup of your configuration before a 
-firmware update**. Changes in Ubiquiti's future firmware (flashing process)
-might potentially cause your configuration to be lost.
-
-#### UniFi Dream Machine (Pro)
-Custom packages on the UniFi Dream Machine (Pro) are re-installed after 
-firmware upgrades, but custom configuration is lost. 
-
-You may move the configuration file to a persistent location and copy back
-the configuration after the firmware upgrade.
-
-```bash
-# Copy to persistent storage
-cp /etc/udm-iptv.conf /mnt/persistent/udm-iptv.conf
-# Copy from persistent storage
-cp /mnt/persistent/udm-iptv.conf /etc/udm-iptv.conf
-```
-
-#### UniFi Dream Machine SE and UniFi Dream Router
-It is currently not possible to persist the installation across firmware updates
-(see [#120](https://github.com/fabianishere/udm-iptv/issues/120)). Your configuration should remain, so only re-installation is necessary.
+**Please remember to make a backup of your configuration before a
+firmware update**. Currently, your configuration and installation might or might
+not persist across firmware updates depending on the type of upgrade
+(see [#120](https://github.com/fabianishere/udm-iptv/issues/120)).
 
 ### Configuration
 You can modify the configuration of the service interactively as follows:
