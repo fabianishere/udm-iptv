@@ -1,6 +1,6 @@
-udm-iptv (future)
+udm-iptv (3.0.2) stable; urgency=medium
 
-  * Add support for UGX Pro
+  * Add support for UGX Pro (firmware 3.0.x)
 
 udm-iptv (3.0.1) stable; urgency=medium
 
