@@ -1,3 +1,7 @@
+udm-iptv (future)
+
+  * Add support for UGX Pro
+
 udm-iptv (3.0.1) stable; urgency=medium
 
   * Fix debugging option for improxy
