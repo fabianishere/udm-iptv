@@ -1,0 +1,119 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the udm-iptv package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: udm-iptv\n"
+"Report-Msgid-Bugs-To: udm-iptv@packages.debian.org\n"
+"POT-Creation-Date: 2023-06-27 12:15+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Description
+#: ../templates:1001
+msgid "Port through which IPTV traffic enters the router:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../templates:2001
+msgid "Configuration profile to use:"
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../templates:3001
+msgid "${note}"
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../templates:4001
+msgid "Interface on which IPTV traffic enters the router:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../templates:5001
+msgid "Is IPTV traffic carried over a separate VLAN?"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../templates:6001
+msgid "ID of VLAN which carries IPTV traffic:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../templates:7001
+msgid "Name of the IPTV VLAN interface:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../templates:8001
+msgid "Custom MAC address for the IPTV VLAN interface:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../templates:9001
+msgid "IP ranges from which the IPTV traffic originates:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../templates:10001
+msgid "Obtain IP address for IPTV interface via DHCP?"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../templates:11001
+msgid "DHCP options to send when requesting an IP address:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../templates:12001
+msgid "Static IP address to assign to IPTV interface:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../templates:13001
+msgid "LAN interfaces on which IPTV should be made available:"
+msgstr ""
+
+#. Type: multiselect
+#. Description
+#: ../templates:14001
+msgid "IGMP Proxy implementation:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../templates:15001
+msgid "Enable quickleave for igmpproxy?"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../templates:16001
+msgid "Enable igmpproxy debugging?"
+msgstr ""
+
+#. Type: boolean
+#. Description
+#: ../templates:17001
+msgid "IGMP version:"
+msgstr ""

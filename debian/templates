@@ -1,89 +1,89 @@
 Template: udm-iptv/wan-port
-Description: Port through which IPTV traffic enters the router:
+_Description: Port through which IPTV traffic enters the router:
 Type: select
 Choices: ${choices}
 Choices-C: ${choices_c}
 
 Template: udm-iptv/profile
-Description: Configuration profile to use:
+_Description: Configuration profile to use:
 Type: select
 Choices: ${choices}
 Choices-C: ${choices_c}
 
 Template: udm-iptv/profile-note
 Type: note
-Description: ${note}
+_Description: ${note}
 
 Template: udm-iptv/wan-interface
-Description: Interface on which IPTV traffic enters the router:
+_Description: Interface on which IPTV traffic enters the router:
 Type: select
 Choices: ${choices}
 
 Template: udm-iptv/wan-vlan-separate
-Description: Is IPTV traffic carried over a separate VLAN?
+_Description: Is IPTV traffic carried over a separate VLAN?
 Type: boolean
 Default: true
 
 Template: udm-iptv/wan-vlan
-Description: ID of VLAN which carries IPTV traffic:
+_Description: ID of VLAN which carries IPTV traffic:
 Type: string
 Default: 4
 
 Template: udm-iptv/wan-vlan-interface
-Description: Name of the IPTV VLAN interface:
+_Description: Name of the IPTV VLAN interface:
 Type: string
 Default: iptv
 
 Template: udm-iptv/wan-vlan-mac
-Description: Custom MAC address for the IPTV VLAN interface:
+_Description: Custom MAC address for the IPTV VLAN interface:
 Type: string
 Default:
 
 Template: udm-iptv/wan-ranges
-Description: IP ranges from which the IPTV traffic originates:
+_Description: IP ranges from which the IPTV traffic originates:
 Type: string
 Default: 213.75.0.0/16, 217.166.0.0/16
 
 Template: udm-iptv/wan-dhcp
-Description: Obtain IP address for IPTV interface via DHCP?
+_Description: Obtain IP address for IPTV interface via DHCP?
 Type: boolean
 
 Template: udm-iptv/wan-dhcp-options
-Description: DHCP options to send when requesting an IP address:
+_Description: DHCP options to send when requesting an IP address:
 Type: string
 Default: -O staticroutes -V IPTV_RG
 
 Template: udm-iptv/wan-static-ip
-Description: Static IP address to assign to IPTV interface:
+_Description: Static IP address to assign to IPTV interface:
 Type: string
 Default:
 
 Template: udm-iptv/lan-interfaces
-Description: LAN interfaces on which IPTV should be made available:
+_Description: LAN interfaces on which IPTV should be made available:
 Type: multiselect
 Choices: ${choices}
 Choices-C: ${choices_c}
 Default: br0
 
 Template: udm-iptv/igmpproxy-program
-Description: IGMP Proxy implementation:
+_Description: IGMP Proxy implementation:
 Type: select
 Choices: igmpproxy (Default), improxy
 Choices-C: igmpproxy, improxy
 Default: igmpproxy
 
 Template: udm-iptv/igmpproxy-quickleave
-Description: Enable quickleave for igmpproxy?
+_Description: Enable quickleave for igmpproxy?
 Type: boolean
 Default: true
 
 Template: udm-iptv/igmpproxy-debug
-Description: Enable igmpproxy debugging?
+_Description: Enable igmpproxy debugging?
 Type: boolean
 Default: false
 
 Template: udm-iptv/igmpproxy-igmp-version
-Description: IGMP version:
+_Description: IGMP version:
 Type: select
 Choices: IGMPv2, IGMPv3
 Choices-C: 2, 3
