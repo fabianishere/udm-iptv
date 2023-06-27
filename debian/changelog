@@ -1,6 +1,7 @@
 udm-iptv (3.0.2) stable; urgency=medium
 
   * Add support for UGX Pro (firmware 3.0.x)
+  * Delete the downloaded Debian packages after installaation
 
 udm-iptv (3.0.1) stable; urgency=medium
 
