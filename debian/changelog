@@ -1,7 +1,10 @@
 udm-iptv (3.0.2) stable; urgency=medium
 
   * Add support for UGX Pro (firmware 3.0.x)
-  * Delete the downloaded Debian packages after installaation
+  * Delete the downloaded Debian packages after installation
+  * Fix typo in changelog and control files
+
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Tue, 17 Jun 2023 20:00:00 +0000
 
 udm-iptv (3.0.1) stable; urgency=medium
 
@@ -38,7 +41,7 @@ udm-iptv (2.1.2) stable; urgency=medium
   * Add explicit dependency on iproute2.
   * Update diagnostic script.
 
- -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Web, 13 Apr 2022 11:00:00 +0100
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Wed, 13 Apr 2022 11:00:00 +0100
 
 udm-iptv (2.1.1) stable; urgency=medium
 
