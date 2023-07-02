@@ -45,6 +45,9 @@ apt-get install -q -y dialog
 # Install udm-iptv and igmpproxy
 apt-get install -q -y "$dest/igmpproxy.deb" "$dest/udm-iptv.deb"
 
+# Delete downloaded packages
+rm -rf "$dest"
+
 echo "Installation successful... You can find your configuration at /etc/udm-iptv.conf."
 echo
 echo "Use the following command to reconfigure the script:"
