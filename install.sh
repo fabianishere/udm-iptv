@@ -36,11 +36,11 @@ chown _apt:root "$dest/udm-iptv.deb" "$dest/igmpproxy.deb"
 
 echo "Installing packages..."
 
-# Update APT sources
-apt-get update -q
+# Update APT sources (best effort)
+apt-get update -q || true
 
 # Install dialog package for interactive install
-apt-get install -q -y dialog
+apt-get install -q -y dialog || echo "Failed to install dialog... Using readline frontend"
 
 # Install udm-iptv and igmpproxy
 apt-get install -q -y "$dest/igmpproxy.deb" "$dest/udm-iptv.deb"
