@@ -8,7 +8,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, 'skip ci') }}
     steps:
       - name: Checkout Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: udm-iptv
       - name: Setup Dependencies

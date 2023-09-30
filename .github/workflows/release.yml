@@ -11,7 +11,7 @@ jobs:
     runs-on: [ubuntu-20.04]
     steps:
       - name: Checkout Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: udm-iptv
           submodules: recursive
@@ -37,7 +37,7 @@ jobs:
     needs: build
     steps:
       - name: Checkout Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
