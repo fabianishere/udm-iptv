@@ -147,6 +147,15 @@ while true; do
         db_input high udm-iptv/lan-interfaces || true
         ;;
     5)  # Configure igmpproxy program
+        programs=""
+        if command -v improxy > /dev/null 2>&1; then
+            programs="improxy"
+        fi
+        if command -v igmpproxy > /dev/null 2>&1; then
+            programs="$programs igmpproxy"
+        fi
+
+        db_subst udm-iptv/igmpproxy-program choices "$(echo $programs | sed 's/ /, /g')"
         db_input low udm-iptv/igmpproxy-program || true
         ;;
     6)  # Configure igmpproxy

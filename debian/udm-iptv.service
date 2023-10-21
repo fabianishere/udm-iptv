@@ -1,6 +1,7 @@
 [Unit]
 Description=IPTV support for the UniFi Dream Machine
 After=network.target
+Conflicts=igmpproxy.service
 
 [Service]
 Type=simple

@@ -1,3 +1,9 @@
+udm-iptv (3.0.3) stable; urgency=medium
+
+  * Change default from igmpproxy to impproxy
+
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Tue, 27 Jun 2023 20:00:00 +0000
+
 udm-iptv (3.0.2) stable; urgency=medium
 
   * Add support for UGX Pro (firmware 3.0.x)

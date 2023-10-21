@@ -68,9 +68,8 @@ Default: br0
 Template: udm-iptv/igmpproxy-program
 _Description: IGMP Proxy implementation:
 Type: select
-Choices: igmpproxy (Default), improxy
-Choices-C: igmpproxy, improxy
-Default: igmpproxy
+Choices: ${choices}
+Default: improxy
 
 Template: udm-iptv/igmpproxy-quickleave
 _Description: Enable quickleave for igmpproxy?

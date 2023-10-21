@@ -18,8 +18,7 @@ if command -v unifi-os > /dev/null 2>&1; then
     exit 1
 fi
 
-UDM_IPTV_VERSION=3.0.2
-IGMPPROXY_VERSION=0.3-1
+UDM_IPTV_VERSION=3.0.3
 
 dest=$(mktemp -d)
 
@@ -28,22 +27,19 @@ echo "Downloading packages..."
 # Download udm-iptv package
 curl -sS -o "$dest/udm-iptv.deb" -L "https://github.com/fabianishere/udm-iptv/releases/download/v$UDM_IPTV_VERSION/udm-iptv_${UDM_IPTV_VERSION}_all.deb"
 
-# Download a recent igmpproxy version
-curl -sS -o "$dest/igmpproxy.deb" -L "http://ftp.debian.org/debian/pool/main/i/igmpproxy/igmpproxy_${IGMPPROXY_VERSION}_arm64.deb"
-
 # Fix permissions on the packages
-chown _apt:root "$dest/udm-iptv.deb" "$dest/igmpproxy.deb"
+chown _apt:root "$dest/udm-iptv.deb"
 
 echo "Installing packages..."
 
 # Update APT sources (best effort)
-apt-get update -q || true
+apt-get update -q 2>&1 /dev/null || true
 
 # Install dialog package for interactive install
-apt-get install -q -y dialog || echo "Failed to install dialog... Using readline frontend"
+apt-get install -q -y dialog 2>&1 /dev/null || echo "Failed to install dialog... Using readline frontend"
 
-# Install udm-iptv and igmpproxy
-apt-get install -q -y "$dest/igmpproxy.deb" "$dest/udm-iptv.deb"
+# Install udm-iptv
+apt-get install -q "$dest/udm-iptv.deb"
 
 # Delete downloaded packages
 rm -rf "$dest"
