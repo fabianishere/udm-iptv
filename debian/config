@@ -127,6 +127,9 @@ while true; do
             UDM|UDR)
                 db_set udm-iptv/wan-port eth4
                 ;;
+            UXG)
+                db_set udm-iptv/wan-port eth1
+                ;;
             *)
                 db_set udm-iptv/wan-port eth8
                 ;;

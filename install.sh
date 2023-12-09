@@ -18,7 +18,7 @@ if command -v unifi-os > /dev/null 2>&1; then
     exit 1
 fi
 
-UDM_IPTV_VERSION=3.0.3
+UDM_IPTV_VERSION=3.0.4
 
 dest=$(mktemp -d)
 
@@ -33,13 +33,13 @@ chown _apt:root "$dest/udm-iptv.deb"
 echo "Installing packages..."
 
 # Update APT sources (best effort)
-apt-get update -q 2>&1 /dev/null || true
+apt-get update 2>&1 1>/dev/null || true
 
 # Install dialog package for interactive install
-apt-get install -q -y dialog 2>&1 /dev/null || echo "Failed to install dialog... Using readline frontend"
+apt-get install -q -y dialog 2>&1 1>/dev/null || echo "Failed to install dialog... Using readline frontend"
 
 # Install udm-iptv
-apt-get install -q "$dest/udm-iptv.deb"
+apt-get install -o Acquire::AllowUnsizedPackages=1 -q "$dest/udm-iptv.deb"
 
 # Delete downloaded packages
 rm -rf "$dest"
