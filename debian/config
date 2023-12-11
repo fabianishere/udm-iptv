@@ -27,6 +27,17 @@ _if_inet_list() {
     done
 }
 
+_if_inet_list_uxg() {
+    for interface in $(find /sys/class/net \( -name "br*" -o -name "eth0*" \) -a ! -name "eth0" -exec basename {} \; | sort); do
+        id=$(echo "$interface" | sed -n 's/\(br\|eth\)\(\d*\)/\2/p')
+        type="LAN"
+        if [ "$id" -gt 0 ]; then
+            type="VLAN $id"
+        fi
+        printf "%-9s [IPv4: %s]\n" "$type" "$(_if_inet_addr "$interface")"
+    done
+}
+
 # Helper function to list the lower interface of some interface
 _if_inet_list_lower() {
     for path in "$1"/lower_*; do
@@ -145,8 +156,16 @@ while true; do
         . /usr/lib/udm-iptv/profiles/"$RET".profile
         ;;
     4)  # Select LAN interfaces
-        db_subst udm-iptv/lan-interfaces choices "$(_if_inet_list | sed ':a;N;s/\n/, /;ba')"
-        db_subst udm-iptv/lan-interfaces choices_c "$(find /sys/class/net -name "br*" -exec basename {} \; | sort | sed ':a;N;s/\n/, /;ba')"
+        case "$board" in
+            UXG)
+                db_subst udm-iptv/lan-interfaces choices "$(_if_inet_list_uxg | sed ':a;N;s/\n/, /;ba')"
+                db_subst udm-iptv/lan-interfaces choices_c "$(find /sys/class/net \( -name "br*" -o -name "eth0*" \) -a ! -name eth0 -exec basename {} \; | sort | sed ':a;N;s/\n/, /;ba')"
+                ;;
+            *)
+                db_subst udm-iptv/lan-interfaces choices "$(_if_inet_list | sed ':a;N;s/\n/, /;ba')"
+                db_subst udm-iptv/lan-interfaces choices_c "$(find /sys/class/net -name "br*" -exec basename {} \; | sort | sed ':a;N;s/\n/, /;ba')"
+                ;;
+        esac
         db_input high udm-iptv/lan-interfaces || true
         ;;
     5)  # Configure igmpproxy program
