@@ -18,7 +18,7 @@ if command -v unifi-os > /dev/null 2>&1; then
     exit 1
 fi
 
-UDM_IPTV_VERSION=3.0.4
+UDM_IPTV_VERSION=3.0.5
 
 dest=$(mktemp -d)
 
