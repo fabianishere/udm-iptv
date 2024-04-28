@@ -1,3 +1,9 @@
+udm-iptv (3.0.5) stable; urgency=medium
+
+  * Support for UCG Ultra in configuration
+
+ -- Erik Post <erik.post@eml.cc>  Sun, 28 Apr 2024 12:00:00 +0000
+
 udm-iptv (3.0.4) stable; urgency=medium
 
   * Support UXG Lite in configuration
