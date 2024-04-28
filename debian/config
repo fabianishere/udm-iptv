@@ -131,8 +131,8 @@ while true; do
                 db_input high udm-iptv/wan-port || true
                 ;;
             UXGPRO)
-                db_subst udm-iptv/wan-port choices "WAN (2.5 GbE), LAN 4 (1 GbE)"
-                db_subst udm-iptv/wan-port choices_c "eth4, eth3"
+                db_subst udm-iptv/wan-port choices "WAN 1 (RJ45), WAN 2 (SFP+)"
+                db_subst udm-iptv/wan-port choices_c "eth0, eth2"
                 db_input high udm-iptv/wan-port || true
                 ;;
             UDM|UDR)
@@ -142,8 +142,8 @@ while true; do
                 db_set udm-iptv/wan-port eth1
                 ;;
             UDRULT)
-                db_subst udm-iptv/wan-port choices "WAN 1 (RJ45), WAN 2 (SFP+)"
-                db_subst udm-iptv/wan-port choices_c "eth8, eth9"
+                db_subst udm-iptv/wan-port choices "WAN (2.5 GbE), LAN 4 (1 GbE)"
+                db_subst udm-iptv/wan-port choices_c "eth4, eth3"
                 db_input high udm-iptv/wan-port || true
                 ;;
             *)
