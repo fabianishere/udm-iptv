@@ -146,6 +146,11 @@ while true; do
                 db_subst udm-iptv/wan-port choices_c "eth4, eth3"
                 db_input high udm-iptv/wan-port || true
                 ;;
+            UCGMAX)
+                db_subst udm-iptv/wan-port choices "WAN, LAN 4"
+                db_subst udm-iptv/wan-port choices_c "eth4, eth3"
+                db_input high udm-iptv/wan-port || true
+                ;;
             *)
                 db_set udm-iptv/wan-port eth8
                 ;;
