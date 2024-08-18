@@ -125,7 +125,7 @@ while true; do
         ;;
     1)  # Configure WAN interface
         case "$board" in
-            UDMPRO|UDMPROSE|UDMSE)
+            UDMPRO|UDMPROSE|UDMSE|UDMPROMAX)
                 db_subst udm-iptv/wan-port choices "WAN 1 (RJ45), WAN 2 (SFP+)"
                 db_subst udm-iptv/wan-port choices_c "eth8, eth9"
                 db_input high udm-iptv/wan-port || true
@@ -146,7 +146,7 @@ while true; do
                 db_subst udm-iptv/wan-port choices_c "eth4, eth3"
                 db_input high udm-iptv/wan-port || true
                 ;;
-            UXGB)
+            UXGB|UCGMAX)
                 db_subst udm-iptv/wan-port choices "WAN (2.5 GbE), LAN 4 (2.5 GbE)"
                 db_subst udm-iptv/wan-port choices_c "eth4, eth3"
                 db_input high udm-iptv/wan-port || true
