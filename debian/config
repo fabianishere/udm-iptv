@@ -67,6 +67,7 @@ _list_profiles() {
     echo "swisscom", "Swisscom (CH)"
     echo "init7", "Init7 (CH)"
     echo "meo", "MEO (PT)"
+    echo "vdf", "VDF (PT)"
     echo "bt", "BT (GB)"
     echo "telenor", "Telenor (NO)"
     echo "vivo", "Vivo SP (BR)"

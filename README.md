@@ -119,7 +119,9 @@ popular IPTV providers. Below is a list of supported IPTV providers:
 | MagentaTV |   DE    | [Manual configuration necessary](https://github.com/fabianishere/udm-iptv/issues/2#issuecomment-1007413230)         |
 |  Swisscom |   CH    | Yes                                                                                                                 |
 |     Init7 |   CH    | Yes                                                                                                                 |
-|       MEO |   PT    | Yes                                                                                                                 |
+|       MEO |   PT    | 
+Yes                                                                                                                 |
+|       VDF |   PT    | Yes                                                                                                                 |
 |        BT |   GB    | Yes                                                                                                                 |
 |   Vivo SP |   BR    | Yes - Tested with GPON TP-Link TX-6610                                                                              |
 |  Vivo GVT |   BR    | Yes - [Manual configuration necessary](https://github.com/fabianishere/udm-iptv/issues/167#issuecomment-1244797462) |
