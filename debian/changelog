@@ -1,5 +1,12 @@
 udm-iptv (3.0.5) stable; urgency=medium
 
+  * Support for Unifi Dream Router 7 (UDR7)
+  * Freedom Internet (NL) IPtv profile
+
+ -- Jelle Kalf <jelle@kalf.org>  Sat, 29 Mar 2025 12:00:00 +0000
+
+udm-iptv (3.0.5) stable; urgency=medium
+
   * Support for UCG Ultra in configuration
 
  -- Erik Post <erik.post@eml.cc>  Sun, 28 Apr 2024 12:00:00 +0000
