@@ -138,6 +138,10 @@ while true; do
             UDM|UDR)
                 db_set udm-iptv/wan-port eth4
                 ;;
+            UDR7)
+                db_subst udm-iptv/wan-port choices "LAN 3 (RJ45), WAN 1 (RJ45), WAN 2 (SFP+)"
+                db_subst udm-iptv/wan-port choices_c "eth2, eth3, eth4"
+                db_input high udm-iptv/wan-port || true
             UXG)
                 db_set udm-iptv/wan-port eth1
                 ;;
