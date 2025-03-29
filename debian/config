@@ -62,6 +62,7 @@ _if_inet_list_upper() {
 _list_profiles() {
     echo "kpn", "KPN (NL)"
     echo "kpn", "XS4ALL (NL)"
+    echo "kpn", "Freedom Internet (NL)"
     echo "tweak", "Tweak (NL)"
     echo "solcon", "Solcon (NL)"
     echo "swisscom", "Swisscom (CH)"
