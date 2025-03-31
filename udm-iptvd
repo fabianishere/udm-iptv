@@ -143,7 +143,9 @@ _igmpproxy_build_config_improxy() {
 
     echo "mld disable"
 
-    if [ -z "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" ] || [ "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" = "false" ]; then
+    if [ "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" = "false" ]; then
+        echo "quickleave disable"
+    else
         echo "quickleave enable"
     fi
 
