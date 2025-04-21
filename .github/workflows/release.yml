@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: [ubuntu-20.04]
+    runs-on: [ubuntu-latest]
     steps:
       - name: Checkout Sources
         uses: actions/checkout@v4
@@ -16,7 +16,7 @@ jobs:
           path: udm-iptv
           submodules: recursive
       - name: Setup Dependencies
-        run: sudo apt-get install devscripts debhelper
+        run: sudo apt-get install devscripts debhelper build-essential
       - name: Build Package
         run: |
           cd udm-iptv
@@ -33,7 +33,7 @@ jobs:
             *.dsc
   release:
     name: Publish Release
-    runs-on: [ubuntu-20.04]
+    runs-on: [ubuntu-latest]
     needs: build
     steps:
       - name: Checkout Sources
@@ -54,7 +54,7 @@ jobs:
           dpkg-parsechangelog -c 1 -l debian/changelog >> $GITHUB_OUTPUT
           echo "${delimiter}" >> $GITHUB_OUTPUT
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
