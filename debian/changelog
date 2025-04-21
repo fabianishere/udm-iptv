@@ -1,9 +1,15 @@
 udm-iptv (3.0.6) stable; urgency=medium
 
-  * Support for Unifi Dream Router 7 (UDR7)
-  * Freedom Internet (NL) IPtv profile
+  * Support for UniFi Dream Router 7 (UDR7)
+  * Support for UniFi Cloud Gateway Fiber
+  * Support for UniFi Gateway Max
+  * Support for UniFi Cloud Gateway Max
+  * Support for UDM Pro Max
+  * Freedom Internet (NL) IPTV profile
+  * Update supported WAN ranges for KPN and Init7
+  * Support quickleave with improxy
 
- -- Jelle Kalf <jelle@kalf.org>  Sat, 29 Mar 2025 12:00:00 +0000
+ -- Fabian Mastenbroek <mail.fabianm@gmail.com>  Mon, 21 Apr 2025 22:00:00 +0000
 
 udm-iptv (3.0.5) stable; urgency=medium
 
