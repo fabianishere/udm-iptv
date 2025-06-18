@@ -153,8 +153,8 @@ while true; do
                 db_input high udm-iptv/wan-port || true
                 ;;
             UCGF)
-                db_subst udm-iptv/wan-port choices "WAN (2.5 GbE), LAN 4 (1 GbE)"
-                db_subst udm-iptv/wan-port choices_c "eth4, eth3"
+                db_subst udm-iptv/wan-port choices "Port 7 (WAN SFP+), Port 5 (WAN 10 GbE)"
+                db_subst udm-iptv/wan-port choices_c "eth6, eth4"
                 db_input high udm-iptv/wan-port || true
                 ;;
             UXGB|UCGMAX)
