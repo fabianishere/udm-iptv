@@ -164,6 +164,7 @@ See below for a reference of the available options to configure:
 | IPTV_WAN_MAC          | Custom MAC address to assign to the IPTV WAN VLAN interface                                             |
 | IPTV_LAN_INTERFACES   | Interfaces on which IPTV should be made available                                                       |
 | IPTV_IGMPPROXY_DEBUG  | Enable debugging for igmpproxy                                                                          |
+| IPTV_IGMPPROXY_DISABLE_QUICKLEAVE | Boolean to disables the quickleave feature for the IGMP Proxy. Set this to true if you have more than one IPTV decoder. Supported by both improxy and igmpproxy. |
 
 The configuration is written to `/etc/udm-iptv.conf` (within UniFi OS).
 
@@ -191,10 +192,12 @@ instructions before opening a discussion.
 2. **Check if IPTV traffic is forwarded to the right VLAN**  
    Make sure that you have configured `IPTV_LAN_INTERFACES` correctly to forward
    to right interfaces (e.g., `br4` for VLAN 4).
-3. **Check if your kernel supports multicast routing**  
+3. **If you have more than one IPTV decoder, disable the quickleave feature**
+   Quickleave is enabled in the default configuration for improxy (the default IGMP proxy) and igmpproxy. If you have multiple IPTV decoders, quickleave will stop a stream for all decoders when just one decoder changes to a different stream.
+4. **Check if your kernel supports multicast routing**  
    If `MRT_INIT failed; Errno(92): Protocol not available` appears in 
    diagnostics, your kernel does not support multicast routing.
-4. **Check if your issue has been reported already**  
+5. **Check if your issue has been reported already**  
    Use the GitHub search functionality to check if your issue has already been
    reported before.
 
