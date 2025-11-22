@@ -198,7 +198,10 @@ instructions before opening a discussion.
 4. **Check if your kernel supports multicast routing**  
    If `MRT_INIT failed; Errno(92): Protocol not available` appears in 
    diagnostics, your kernel does not support multicast routing.
-5. **Check if your issue has been reported already**  
+5. **Does the IPTV work, but the feed stops a couple seconds after switching to a channel?**  
+   Check that any switches between the router and TV box support IGMP snooping.
+   This can be easily validated by trying if it does work properly when connected directly to the router. 
+7. **Check if your issue has been reported already**  
    Use the GitHub search functionality to check if your issue has already been
    reported before.
 
