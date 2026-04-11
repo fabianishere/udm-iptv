@@ -73,6 +73,7 @@ _list_profiles() {
     echo "vivo", "Vivo SP (BR)"
     echo "posttv", "PostTV (LU)"
     echo "magentatv", "MagentaTV (DE)"
+    echo "bellcanada", "Bell Canada"
 }
 
 # Obtain the board name of the device running the installation script
@@ -104,6 +105,7 @@ if [ -e $CONFIGFILE ]; then
     db_set udm-iptv/wan-vlan-mac "$IPTV_WAN_VLAN_MAC"
 
     db_set udm-iptv/wan-ranges "$(echo "$IPTV_WAN_RANGES" | tr -s ' ' ',')"
+    db_set udm-iptv/wan-ranges-gw-dest "$([ "$IPTV_WAN_RANGES_GW_DEST" = "true" ] && echo "true" || echo "false")"
     db_set udm-iptv/wan-dhcp "$IPTV_WAN_DHCP"
     db_set udm-iptv/wan-dhcp-options "$IPTV_WAN_DHCP_OPTIONS"
     db_set udm-iptv/wan-static-ip "$IPTV_WAN_STATIC_IP"

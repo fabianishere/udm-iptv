@@ -84,7 +84,13 @@ routes() {
     else
         local gw=
         for gw in $router; do
-            route_add 0.0.0.0/0 $gw $num && num=$(($num + 1))
+            local dests="0.0.0.0/0"
+            if [ "$IPTV_WAN_RANGES_GW_DEST" = "true" ]; then
+                dests=$IPTV_WAN_RANGES
+            fi
+            for dest in $dests; do
+                route_add $dest $gw $num && num=$(($num + 1))
+            done
         done
     fi
 }

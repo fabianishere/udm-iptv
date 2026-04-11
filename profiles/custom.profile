@@ -62,6 +62,10 @@ while true; do
         if [ "$RET" = true ]; then
             db_set udm-iptv/wan-static-ip ""
             db_input high udm-iptv/wan-dhcp-options || true
+            db_get udm-iptv/wan-ranges
+            if [ -n "$RET" ]; then
+                db_input high udm-iptv/wan-ranges-gw-dest || true
+            fi
         else
             db_input low udm-iptv/wan-static-ip || true
         fi
