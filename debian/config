@@ -6,7 +6,10 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
+# shellcheck source-path=..
+
 # Source debconf library.
+# shellcheck source=/dev/null
 . /usr/share/debconf/confmodule
 
 # Helper function to obtain IP address of interface
@@ -18,43 +21,51 @@ _if_inet_addr() {
 # Helper function to list interfaces
 _if_inet_list() {
     for interface in $(find /sys/class/net -name "br*" -exec basename {} \; | sort); do
-        id=$(echo "$interface" | sed -n 's/br\(\d*\)/\1/p')
+        id=$(echo "${interface}" | sed -n 's/br\(\d*\)/\1/p')
         type="LAN"
-        if [ "$id" -gt 0 ]; then
-            type="VLAN $id"
+        if [ "${id}" -gt 0 ]; then
+            type="VLAN ${id}"
         fi
-        printf "%-9s [IPv4: %s]\n" "$type" "$(_if_inet_addr "$interface")"
+        addr=$(_if_inet_addr "${interface}")
+        printf "%-9s [IPv4: %s]\n" "${type}" "${addr}"
     done
 }
 
 _if_inet_list_uxg() {
     for interface in $(find /sys/class/net \( -name "br*" -o -name "eth0*" \) -a ! -name "eth0" -exec basename {} \; | sort); do
-        id=$(echo "$interface" | sed -n 's/\(br\|eth\)\(\d*\)/\2/p')
+        id=$(echo "${interface}" | sed -n 's/\(br\|eth\)\(\d*\)/\2/p')
         type="LAN"
-        if [ "$id" -gt 0 ]; then
-            type="VLAN $id"
+        if [ "${id}" -gt 0 ]; then
+            type="VLAN ${id}"
         fi
-        printf "%-9s [IPv4: %s]\n" "$type" "$(_if_inet_addr "$interface")"
+        addr=$(_if_inet_addr "${interface}")
+        printf "%-9s [IPv4: %s]\n" "${type}" "${addr}"
     done
 }
 
 # Helper function to list the lower interface of some interface
 _if_inet_list_lower() {
     for path in "$1"/lower_*; do
-        if ! [ -e "$path" ]; then
-                basename "$(readlink "$1")"
+        if ! [ -e "${path}" ]; then
+                link=$(readlink "$1") || link=
+                if [ -n "${link}" ]; then
+                        basename "${link}"
+                fi
                 break
         fi
-        _if_inet_list_lower "$path"
+        _if_inet_list_lower "${path}"
     done
 }
 
 # Helper function to list all upper interfaces of some interface
 _if_inet_list_upper() {
-    basename "$(readlink "$1")"
+    link=$(readlink "$1") || link=
+    if [ -n "${link}" ]; then
+        basename "${link}"
+    fi
     for path in "$1"/upper_*; do
-        [ -e "$path" ] || continue
-        _if_inet_list_upper "$path"
+        [ -e "${path}" ] || continue
+        _if_inet_list_upper "${path}"
     done
 }
 
@@ -88,44 +99,71 @@ db_version 2.0
 db_capb backup
 db_capb escape
 
-# Restore existing configuration
+# Restore saved answers before the configuration flow runs. During a firmware
+# restore, the package has not been unpacked yet, but /data survives and already
+# contains the exact answers that produced the persisted configuration.
 CONFIGFILE=/etc/udm-iptv.conf
-if [ -e $CONFIGFILE ]; then
-    # shellcheck source=../udm-iptv.conf
-    . $CONFIGFILE || true
+STATEDIR="${UDM_IPTV_STATE_DIR:-/data/udm-iptv}"
+PROFILEDIR=/usr/lib/udm-iptv/profiles
+PROFILEPENDING=/var/cache/udm-iptv/profile.pending
+restored=
+if [ ! -e "${CONFIGFILE}" ] && [ -r "${STATEDIR}/debconf.preseed" ]; then
+    while read -r _ question _ value <&7; do
+        [ -n "${question}" ] || continue
+        db_set "${question}" "${value}" || true
+    done 7< "${STATEDIR}/debconf.preseed"
+    restored=yes
+    rm -f "${PROFILEPENDING}"
+fi
+
+# Restore existing configuration
+if [ -e "${CONFIGFILE}" ]; then
+    # shellcheck source=udm-iptv.conf
+    . "${CONFIGFILE}" || true
 
     # Store values from config file into debconf db.
-    db_set udm-iptv/wan-port "$(_if_inet_list_lower /sys/class/net/"$IPTV_WAN_INTERFACE")"
-    db_set udm-iptv/wan-interface "$IPTV_WAN_INTERFACE"
+    wan_port=$(_if_inet_list_lower /sys/class/net/"${IPTV_WAN_INTERFACE}")
+    db_set udm-iptv/wan-port "${wan_port}"
+    db_set udm-iptv/wan-interface "${IPTV_WAN_INTERFACE}"
 
-    db_set udm-iptv/wan-vlan-separate "$([ "$IPTV_WAN_INTERFACE" = 0 ] && echo "false" || echo "true")"
-    db_set udm-iptv/wan-vlan "$IPTV_WAN_VLAN"
-    db_set udm-iptv/wan-vlan-interface "$IPTV_WAN_VLAN_INTERFACE"
-    db_set udm-iptv/wan-vlan-mac "$IPTV_WAN_VLAN_MAC"
+    vlan_separate="true"
+    if [ "${IPTV_WAN_INTERFACE}" = 0 ]; then
+        vlan_separate="false"
+    fi
+    db_set udm-iptv/wan-vlan-separate "${vlan_separate}"
+    db_set udm-iptv/wan-vlan "${IPTV_WAN_VLAN}"
+    db_set udm-iptv/wan-vlan-interface "${IPTV_WAN_VLAN_INTERFACE}"
+    db_set udm-iptv/wan-vlan-mac "${IPTV_WAN_VLAN_MAC:-}"
 
-    db_set udm-iptv/wan-ranges "$(echo "$IPTV_WAN_RANGES" | tr -s ' ' ',')"
-    db_set udm-iptv/wan-dhcp "$IPTV_WAN_DHCP"
-    db_set udm-iptv/wan-dhcp-options "$IPTV_WAN_DHCP_OPTIONS"
-    db_set udm-iptv/wan-static-ip "$IPTV_WAN_STATIC_IP"
+    wan_ranges=$(echo "${IPTV_WAN_RANGES}" | tr -s ' ' ',')
+    db_set udm-iptv/wan-ranges "${wan_ranges}"
+    db_set udm-iptv/wan-dhcp "${IPTV_WAN_DHCP:-}"
+    db_set udm-iptv/wan-dhcp-options "${IPTV_WAN_DHCP_OPTIONS}"
+    db_set udm-iptv/wan-static-ip "${IPTV_WAN_STATIC_IP:-}"
 
-    db_set udm-iptv/lan-interfaces "$(echo "$IPTV_LAN_INTERFACES" | tr -s ' ' ',')"
+    lan_interfaces=$(echo "${IPTV_LAN_INTERFACES}" | tr -s ' ' ',')
+    db_set udm-iptv/lan-interfaces "${lan_interfaces}"
 
-    db_set udm-iptv/igmpproxy-program "$IPTV_IGMPPROXY_PROGRAM"
-    db_set udm-iptv/igmpproxy-quickleave "$([ -n "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" ] && [ "$IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" != "false" ] && echo "false" || echo "true")"
-    db_set udm-iptv/igmpproxy-debug "$IPTV_IGMPPROXY_DEBUG"
-    db_set udm-iptv/igmpproxy-igmp-version "$IPTV_IGMPPROXY_IGMP_VERSION"
+    db_set udm-iptv/igmpproxy-program "${IPTV_IGMPPROXY_PROGRAM:-}"
+    quickleave="true"
+    if [ -n "${IPTV_IGMPPROXY_DISABLE_QUICKLEAVE}" ] && [ "${IPTV_IGMPPROXY_DISABLE_QUICKLEAVE}" != "false" ]; then
+        quickleave="false"
+    fi
+    db_set udm-iptv/igmpproxy-quickleave "${quickleave}"
+    db_set udm-iptv/igmpproxy-debug "${IPTV_IGMPPROXY_DEBUG}"
+    db_set udm-iptv/igmpproxy-igmp-version "${IPTV_IGMPPROXY_IGMP_VERSION:-}"
 fi
 
 # Facilitate backup capability per debconf-devel(7)
 STATE=1
 while true; do
-    case "$STATE" in
+    case "${STATE}" in
     0)  # ensure going back from initial step is harmless
         STATE=1
         continue
         ;;
     1)  # Configure WAN interface
-        case "$board" in
+        case "${board}" in
             UDMPRO|UDMPROSE|UDMSE|UDMPROMAX)
                 db_subst udm-iptv/wan-port choices "WAN 1 (RJ45), WAN 2 (SFP+)"
                 db_subst udm-iptv/wan-port choices_c "eth8, eth9"
@@ -173,23 +211,42 @@ while true; do
         esac
         ;;
     2)  # Select configuration profile
-        db_subst udm-iptv/profile choices "Custom, $(_list_profiles | sort | cut -d, -f 2 | sed -e 's/^[[:space:]]*//' | sed ':a;N;s/\n/, /;ba')"
-        db_subst udm-iptv/profile choices_c "custom, $(_list_profiles | sort | cut -d, -f 1 | sed -e 's/^[[:space:]]*//' | sed ':a;N;s/\n/, /;ba')"
+        profile_names=$(_list_profiles | sort | cut -d, -f 2 | sed -e 's/^[[:space:]]*//' | sed ':a;N;s/\n/, /;ba')
+        profile_ids=$(_list_profiles | sort | cut -d, -f 1 | sed -e 's/^[[:space:]]*//' | sed ':a;N;s/\n/, /;ba')
+        db_subst udm-iptv/profile choices "Custom, ${profile_names}"
+        db_subst udm-iptv/profile choices_c "custom, ${profile_ids}"
         db_input high udm-iptv/profile || true
         ;;
     3)  # Perform profile configuration
-        db_get udm-iptv/profile
-        . /usr/lib/udm-iptv/profiles/"$RET".profile
+        if [ -z "${restored}" ]; then
+            db_get udm-iptv/profile
+            profile="${PROFILEDIR}/${RET:-}.profile"
+            if [ -r "${profile}" ]; then
+                # shellcheck source=profiles/custom.profile
+                . "${profile}"
+                rm -f "${PROFILEPENDING}"
+            elif [ -d "${PROFILEDIR}" ]; then
+                echo "warning: no profile at ${profile}, keeping the current answers" >&2
+                rm -f "${PROFILEPENDING}"
+            else
+                mkdir -p "$(dirname "${PROFILEPENDING}")"
+                printf '%s\n' "${RET:-}" > "${PROFILEPENDING}"
+            fi
+        fi
         ;;
     4)  # Select LAN interfaces
-        case "$board" in
+        case "${board}" in
             UXG)
-                db_subst udm-iptv/lan-interfaces choices "$(_if_inet_list_uxg | sed ':a;N;s/\n/, /;ba')"
-                db_subst udm-iptv/lan-interfaces choices_c "$(find /sys/class/net \( -name "br*" -o -name "eth0*" \) -a ! -name eth0 -exec basename {} \; | sort | sed ':a;N;s/\n/, /;ba')"
+                lan_choices=$(_if_inet_list_uxg | sed ':a;N;s/\n/, /;ba')
+                lan_choices_c=$(find /sys/class/net \( -name "br*" -o -name "eth0*" \) -a ! -name eth0 -exec basename {} \; | sort | sed ':a;N;s/\n/, /;ba')
+                db_subst udm-iptv/lan-interfaces choices "${lan_choices}"
+                db_subst udm-iptv/lan-interfaces choices_c "${lan_choices_c}"
                 ;;
             *)
-                db_subst udm-iptv/lan-interfaces choices "$(_if_inet_list | sed ':a;N;s/\n/, /;ba')"
-                db_subst udm-iptv/lan-interfaces choices_c "$(find /sys/class/net -name "br*" -exec basename {} \; | sort | sed ':a;N;s/\n/, /;ba')"
+                lan_choices=$(_if_inet_list | sed ':a;N;s/\n/, /;ba')
+                lan_choices_c=$(find /sys/class/net -name "br*" -exec basename {} \; | sort | sed ':a;N;s/\n/, /;ba')
+                db_subst udm-iptv/lan-interfaces choices "${lan_choices}"
+                db_subst udm-iptv/lan-interfaces choices_c "${lan_choices_c}"
                 ;;
         esac
         db_input high udm-iptv/lan-interfaces || true
@@ -200,15 +257,16 @@ while true; do
             programs="improxy"
         fi
         if command -v igmpproxy > /dev/null 2>&1; then
-            programs="$programs igmpproxy"
+            programs="${programs} igmpproxy"
         fi
 
-        db_subst udm-iptv/igmpproxy-program choices "$(echo $programs | sed 's/ /, /g')"
+        program_choices=$(echo "${programs}" | sed 's/ /, /g')
+        db_subst udm-iptv/igmpproxy-program choices "${program_choices}"
         db_input low udm-iptv/igmpproxy-program || true
         ;;
     6)  # Configure igmpproxy
         db_get udm-iptv/igmpproxy-program
-        if [ "$RET" = "improxy" ]; then
+        if [ "${RET}" = "improxy" ]; then
             db_beginblock
             db_input medium udm-iptv/igmpproxy-igmp-version || true
             db_input medium udm-iptv/igmpproxy-debug || true
@@ -224,14 +282,14 @@ while true; do
         exit 0
         ;;
     *)  # unknown state
-        echo "Unknown configuration state: $STATE" >&2
+        echo "Unknown configuration state: ${STATE}" >&2
         exit 2
         ;;
     esac
     if db_go; then
-        STATE=$(($STATE + 1))
+        STATE=$((STATE + 1))
     else
-        STATE=$(($STATE - 1))
+        STATE=$((STATE - 1))
     fi
 done
 

@@ -1,6 +1,6 @@
 name: Bug Report
 description: Report a bug in udm-iptv.
-labels: 'kind/bug'
+labels: "kind/bug"
 body:
   - type: markdown
     attributes:
@@ -8,7 +8,7 @@ body:
   - type: input
     attributes:
       label: What is your ISP? (if relevant)
-      description: 'The name of your Internet Service Provider (ISP) that supplies you with an internet connection (e.g., KPN).'
+      description: "The name of your Internet Service Provider (ISP) that supplies you with an internet connection (e.g., KPN)."
   - type: textarea
     attributes:
       label: Diagnostic Information

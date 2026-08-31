@@ -1,0 +1,140 @@
+#!/bin/sh
+# Script for reinstalling udm-iptv after a firmware update.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+set -eu
+
+UDM_IPTV_STATE_DIR="${UDM_IPTV_STATE_DIR:-/data/udm-iptv}"
+UDM_IPTV_REPOSITORY="${UDM_IPTV_REPOSITORY:-fabianishere/udm-iptv}"
+UDM_IPTV_BRANCH="${UDM_IPTV_BRANCH:-HEAD}"
+UDM_IPTV_LOCK_TIMEOUT="${UDM_IPTV_LOCK_TIMEOUT:-1800}"
+UDM_IPTV_NETWORK_TIMEOUT="${UDM_IPTV_NETWORK_TIMEOUT:-300}"
+UDM_IPTV_SYSTEMD_TIMEOUT="${UDM_IPTV_SYSTEMD_TIMEOUT:-60}"
+
+dest=
+
+cleanup() {
+	if [ -n "${dest}" ]; then
+		rm -rf "${dest}"
+	fi
+}
+
+if systemctl is-active --quiet udm-iptv 2>/dev/null; then
+	echo "udm-iptv is already running, nothing to restore."
+	exit 0
+fi
+
+if ! [ -e "${UDM_IPTV_STATE_DIR}/debconf.preseed" ]; then
+	echo "error: No saved configuration found in ${UDM_IPTV_STATE_DIR}."
+	echo "Run the following command while udm-iptv is installed:"
+	echo
+	printf "\t udm-iptv persist\n"
+	exit 1
+fi
+
+# UniFi OS reinstalls its own packages on the first boot after a firmware update
+# and holds package-manager locks for as long as that takes.
+package_manager_busy() {
+	for lock in \
+		/var/lib/dpkg/lock \
+		/var/lib/dpkg/lock-frontend \
+		/var/cache/apt/archives/lock \
+		/var/lib/apt/lists/lock; do
+		if fuser "${lock}" >/dev/null 2>&1; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+waited=0
+while package_manager_busy; do
+	if [ "${waited}" -ge "${UDM_IPTV_LOCK_TIMEOUT}" ]; then
+		echo "error: Another package manager still holds the lock after ${waited}s."
+		exit 1
+	fi
+
+	if [ "${waited}" -eq 0 ]; then
+		echo "Waiting for another package manager to finish..."
+	fi
+
+	sleep 15
+	waited=$((waited + 15))
+done
+
+export DEBIAN_FRONTEND=noninteractive
+
+if [ -e "${UDM_IPTV_STATE_DIR}/udm-iptv.deb" ]; then
+	trap cleanup EXIT
+	dest=$(mktemp -d)
+
+	cp "${UDM_IPTV_STATE_DIR}/udm-iptv.deb" "${dest}/udm-iptv.deb"
+	chown _apt:root "${dest}/udm-iptv.deb"
+
+	echo "Installing the package saved in ${UDM_IPTV_STATE_DIR}..."
+	apt-get install -o Acquire::AllowUnsizedPackages=1 -q -y "${dest}/udm-iptv.deb"
+else
+	echo "No package saved in ${UDM_IPTV_STATE_DIR}, running the installer..."
+	network_started=$(date +%s)
+	network_waited=0
+	network_wait_reported=0
+	while :; do
+		network_remaining=$((UDM_IPTV_NETWORK_TIMEOUT - network_waited))
+		if [ "${network_remaining}" -le 0 ]; then
+			echo "error: Installer download did not succeed after ${network_waited}s."
+			exit 1
+		fi
+
+		network_attempt_timeout=30
+		if [ "${network_remaining}" -lt "${network_attempt_timeout}" ]; then
+			network_attempt_timeout=${network_remaining}
+		fi
+		if installer=$(curl -fsSL --connect-timeout 10 \
+			--max-time "${network_attempt_timeout}" \
+			"https://raw.githubusercontent.com/${UDM_IPTV_REPOSITORY}/${UDM_IPTV_BRANCH}/install.sh"); then
+			break
+		fi
+
+		network_waited=$(($(date +%s) - network_started))
+		if [ "${network_waited}" -ge "${UDM_IPTV_NETWORK_TIMEOUT}" ]; then
+			echo "error: Installer download did not succeed after ${network_waited}s."
+			exit 1
+		fi
+
+		if [ "${network_wait_reported}" -eq 0 ]; then
+			echo "Waiting for network access to download the installer..."
+			network_wait_reported=1
+		fi
+
+		network_sleep=15
+		network_remaining=$((UDM_IPTV_NETWORK_TIMEOUT - network_waited))
+		if [ "${network_remaining}" -lt "${network_sleep}" ]; then
+			network_sleep=${network_remaining}
+		fi
+		sleep "${network_sleep}"
+		network_waited=$(($(date +%s) - network_started))
+	done
+	sh -c "${installer}"
+fi
+
+waited=0
+while ! systemctl enable udm-iptv || ! systemctl restart udm-iptv; do
+	if [ "${waited}" -ge "${UDM_IPTV_SYSTEMD_TIMEOUT}" ]; then
+		echo "error: Could not enable and restart udm-iptv after ${waited}s."
+		exit 1
+	fi
+
+	if [ "${waited}" -eq 0 ]; then
+		echo "Waiting for systemd to finish reloading..."
+	fi
+
+	sleep 2
+	waited=$((waited + 2))
+done
+
+state=$(systemctl is-active udm-iptv || true)
+echo "Restored udm-iptv, the service is ${state}."

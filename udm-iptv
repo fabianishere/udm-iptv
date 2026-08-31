@@ -10,80 +10,340 @@
 
 set -eu
 
+UDM_IPTV_STATE_DIR="${UDM_IPTV_STATE_DIR:-/data/udm-iptv}"
+UDM_IPTV_REPOSITORY="${UDM_IPTV_REPOSITORY:-fabianishere/udm-iptv}"
+UDM_IPTV_BRANCH="${UDM_IPTV_BRANCH:-HEAD}"
+
 # (Re)configure the udm-iptv installation
-udm_iptv_configure()
-{
-    dpkg-reconfigure -p low udm-iptv
+udm_iptv_configure() {
+	dpkg-reconfigure -p low udm-iptv
 }
 
 # Upgrade udm-iptv installation to latest version
-udm_iptv_upgrade()
-{
-    echo "Running udm-iptv installer..."
-    sh -c "$(curl https://raw.githubusercontent.com/fabianishere/udm-iptv/master/install.sh -sSf)"
+udm_iptv_upgrade_usage() {
+	cat <<EOF
+Usage: $0 upgrade [OPTIONS...]
+Upgrade the udm-iptv installation.
+Package source (choose at most one):
+  --latest              Install the latest published release (default)
+  --version VERSION     Install a published release version
+  --package URL_OR_PATH Install a package from a URL or local path
+  --pr PR               Install the successful build of a pull request
+  --run RUN             Install a workflow run, or "latest"
+Other options:
+  --force                  Re-download and reinstall the selected version
+  --repository OWNER/REPO  Repository to install from
+  --branch REF             Ref from which to load a fallback installer
+  --token-file PATH        Read the Actions API token from a file
+  --timeout SECONDS        Workflow-run wait timeout
+  -h, --help               Show this message and exit
+EOF
+}
+
+udm_iptv_upgrade() {
+	UDM_IPTV_VERSION="${UDM_IPTV_VERSION:-latest}"
+	UDM_IPTV_PACKAGE="${UDM_IPTV_PACKAGE:-}"
+	UDM_IPTV_PR="${UDM_IPTV_PR:-}"
+	UDM_IPTV_RUN="${UDM_IPTV_RUN:-}"
+	UDM_IPTV_TOKEN="${UDM_IPTV_TOKEN:-${GITHUB_TOKEN:-}}"
+	UDM_IPTV_TIMEOUT_SECONDS="${UDM_IPTV_TIMEOUT_SECONDS:-900}"
+	UDM_IPTV_FORCE="${UDM_IPTV_FORCE:-false}"
+	source=
+
+	while [ "$#" -gt 0 ]; do
+		case "$1" in
+		--force)
+			UDM_IPTV_FORCE=true
+			shift
+			;;
+		--latest)
+			[ -z "${source}" ] || {
+				echo "error: Choose only one package source." >&2
+				return 2
+			}
+			source=latest
+			UDM_IPTV_VERSION=latest
+			UDM_IPTV_PACKAGE=
+			UDM_IPTV_PR=
+			UDM_IPTV_RUN=
+			shift
+			;;
+		--version | --package | --pr | --run)
+			[ "$#" -ge 2 ] || {
+				echo "error: $1 requires a value." >&2
+				return 2
+			}
+			[ -z "${source}" ] || {
+				echo "error: Choose only one package source." >&2
+				return 2
+			}
+			source=${1#--}
+			case "$1" in
+			--version)
+				UDM_IPTV_VERSION=$2
+				UDM_IPTV_PACKAGE=
+				UDM_IPTV_PR=
+				UDM_IPTV_RUN=
+				;;
+			--package)
+				UDM_IPTV_PACKAGE=$2
+				UDM_IPTV_PR=
+				UDM_IPTV_RUN=
+				;;
+			--pr)
+				UDM_IPTV_PACKAGE=
+				UDM_IPTV_PR=$2
+				UDM_IPTV_RUN=
+				;;
+			--run)
+				UDM_IPTV_PACKAGE=
+				UDM_IPTV_PR=
+				UDM_IPTV_RUN=$2
+				;;
+			*)
+				echo "error: Unknown package source $1." >&2
+				return 2
+				;;
+			esac
+			shift 2
+			;;
+		--repository | --branch | --token-file | --timeout)
+			[ "$#" -ge 2 ] || {
+				echo "error: $1 requires a value." >&2
+				return 2
+			}
+			case "$1" in
+			--repository) UDM_IPTV_REPOSITORY=$2 ;;
+			--branch) UDM_IPTV_BRANCH=$2 ;;
+			--token-file)
+				[ -r "$2" ] || {
+					echo "error: Cannot read token file $2." >&2
+					return 2
+				}
+				UDM_IPTV_TOKEN=$(cat "$2")
+				;;
+			--timeout)
+				case "$2" in
+				"" | *[!0-9]*)
+					echo "error: Timeout must be a non-negative integer." >&2
+					return 2
+					;;
+				*) ;;
+				esac
+				UDM_IPTV_TIMEOUT_SECONDS=$2
+				;;
+			*)
+				echo "error: Unknown upgrade option $1." >&2
+				return 2
+				;;
+			esac
+			shift 2
+			;;
+		-h | --help)
+			udm_iptv_upgrade_usage
+			return 0
+			;;
+		--)
+			shift
+			break
+			;;
+		*)
+			echo "error: Unknown upgrade option $1." >&2
+			udm_iptv_upgrade_usage >&2
+			return 2
+			;;
+		esac
+	done
+
+	[ "$#" -eq 0 ] || {
+		echo "error: Upgrade does not accept positional arguments." >&2
+		return 2
+	}
+
+	export UDM_IPTV_VERSION UDM_IPTV_REPOSITORY UDM_IPTV_BRANCH
+	export UDM_IPTV_PACKAGE UDM_IPTV_PR UDM_IPTV_RUN
+	export UDM_IPTV_TOKEN UDM_IPTV_TIMEOUT_SECONDS UDM_IPTV_FORCE
+	export UDM_IPTV_STATE_DIR
+
+	echo "Running udm-iptv installer..."
+	if [ -r /usr/lib/udm-iptv/install.sh ]; then
+		sh /usr/lib/udm-iptv/install.sh
+	else
+		installer=$(curl -fsSL "https://raw.githubusercontent.com/${UDM_IPTV_REPOSITORY}/${UDM_IPTV_BRANCH}/install.sh")
+		sh -c "${installer}"
+	fi
+}
+
+# Save the current answers and configuration outside the root filesystem
+udm_iptv_persist() {
+	if ! [ -d "$(dirname "${UDM_IPTV_STATE_DIR}")" ]; then
+		echo "warning: $(dirname "${UDM_IPTV_STATE_DIR}") does not exist, not saving configuration."
+		return 0
+	fi
+
+	mkdir -p "${UDM_IPTV_STATE_DIR}"
+
+	if [ -n "${UDM_IPTV_DEBCONF_VALUES:-}" ]; then
+		cp "${UDM_IPTV_DEBCONF_VALUES}" "${UDM_IPTV_STATE_DIR}/.values"
+	else
+		awk '
+            /^Name: udm-iptv/ { name = $2; have = 0 }
+            /^Value:/ && name { $1 = ""; sub(/^ /, ""); value = $0; have = 1 }
+            /^$/ { if (name && have) print name "\t" value; name = ""; have = 0 }
+        ' /var/cache/debconf/config.dat >"${UDM_IPTV_STATE_DIR}/.values"
+	fi
+
+	awk '
+        /^Name: udm-iptv/ { name = $2 }
+        /^Type: / && name { print name "\t" $2; name = "" }
+    ' /var/cache/debconf/templates.dat >"${UDM_IPTV_STATE_DIR}/.types"
+
+	awk -F'\t' '
+        NR == FNR { type[$1] = $2; next }
+        $1 in type && type[$1] != "note" { printf "udm-iptv\t%s\t%s\t%s\n", $1, type[$1], $2 }
+    ' "${UDM_IPTV_STATE_DIR}/.types" "${UDM_IPTV_STATE_DIR}/.values" >"${UDM_IPTV_STATE_DIR}/debconf.preseed"
+
+	chmod 600 "${UDM_IPTV_STATE_DIR}/debconf.preseed"
+
+	rm -f "${UDM_IPTV_STATE_DIR}/.values" "${UDM_IPTV_STATE_DIR}/.types"
+
+	if [ -e /etc/udm-iptv.conf ]; then
+		cp /etc/udm-iptv.conf "${UDM_IPTV_STATE_DIR}/udm-iptv.conf"
+		chmod 600 "${UDM_IPTV_STATE_DIR}/udm-iptv.conf"
+	fi
+
+	# The service unit that runs this after a firmware update lives in /etc and
+	# survives, but the copy under /usr/lib does not.
+	if [ -e /usr/lib/udm-iptv/udm-iptv-restore ]; then
+		cp /usr/lib/udm-iptv/udm-iptv-restore "${UDM_IPTV_STATE_DIR}/udm-iptv-restore"
+		chmod 755 "${UDM_IPTV_STATE_DIR}/udm-iptv-restore"
+	fi
+
+	answers=$(wc -l <"${UDM_IPTV_STATE_DIR}/debconf.preseed")
+	echo "Saved ${answers} answers to ${UDM_IPTV_STATE_DIR}."
+}
+
+# Reinstall udm-iptv from persisted state after a firmware update
+udm_iptv_restore() {
+	export UDM_IPTV_STATE_DIR
+
+	for helper in /usr/lib/udm-iptv/udm-iptv-restore "${UDM_IPTV_STATE_DIR}/udm-iptv-restore"; do
+		if [ -x "${helper}" ]; then
+			exec "${helper}"
+		fi
+	done
+
+	echo "error: No restore helper found."
+	exit 1
 }
 
 # Remove the udm-iptv installation from the system
-udm_iptv_uninstall()
-{
-    apt-get remove -y dialog igmpproxy udm-iptv
+udm_iptv_uninstall_usage() {
+	cat <<EOF
+Usage: $0 uninstall [OPTIONS...]
+Remove the udm-iptv installation.
+Options:
+  --purge       Remove the package and all persisted state (default)
+  --keep-data   Remove the package but retain /data for manual restoration
+  -h, --help    Show this message and exit
+EOF
+}
+
+udm_iptv_uninstall() {
+	keep_data=false
+	while [ "$#" -gt 0 ]; do
+		case "$1" in
+		--purge)
+			keep_data=false
+			;;
+		--keep-data)
+			keep_data=true
+			;;
+		-h | --help)
+			udm_iptv_uninstall_usage
+			return 0
+			;;
+		*)
+			echo "error: Unknown uninstall option $1." >&2
+			udm_iptv_uninstall_usage >&2
+			return 2
+			;;
+		esac
+		shift
+	done
+
+	if [ "${keep_data}" = true ]; then
+		apt-get remove -y udm-iptv
+		echo "Retained saved state in ${UDM_IPTV_STATE_DIR}."
+	else
+		apt-get purge -y udm-iptv
+	fi
 }
 
 # Restart the udm-iptv daemon via systemd
-udm_iptv_restart()
-{
-    systemctl restart udm-iptv
+udm_iptv_restart() {
+	systemctl restart udm-iptv
 }
 
 # Print diagnostics for troubleshooting
-udm_iptv_diagnose()
-{
-    if ! [ -e /etc/udm-iptv.conf ] ; then
-        echo "error: The configuration for udm-iptv is not found."
-        echo "Please reconfigure your udm-iptv installation:"
-        echo "    udm-iptv reconfigure"
-        exit 1
-    fi
+udm_iptv_diagnose() {
+	if ! [ -e /etc/udm-iptv.conf ]; then
+		echo "error: The configuration for udm-iptv is not found."
+		echo "Please reconfigure your udm-iptv installation:"
+		echo "    udm-iptv reconfigure"
+		exit 1
+	fi
 
-    # Load configuration
-    . /etc/udm-iptv.conf
+	# shellcheck source=udm-iptv.conf
+	. /etc/udm-iptv.conf
 
-    if [ "$IPTV_WAN_VLAN" -ne 0 ]; then
-        target="$IPTV_WAN_VLAN_INTERFACE"
-    else
-        target="$IPTV_WAN_INTERFACE"
-    fi
+	if [ "${IPTV_WAN_VLAN}" -ne 0 ]; then
+		target="${IPTV_WAN_VLAN_INTERFACE}"
+	else
+		target="${IPTV_WAN_INTERFACE}"
+	fi
 
-    echo "Please share the following output with the developers:"
-    echo "=== Configuration ==="
-    echo "WAN Interface: $IPTV_WAN_INTERFACE"
-    echo "WAN VLAN: $IPTV_WAN_VLAN (dev $IPTV_WAN_VLAN_INTERFACE$([ -n "${IPTV_WAN_VLAN_MAC:-}" ] && echo " mac $IPTV_WAN_VLAN_MAC"))"
-    echo "WAN DHCP: $([ -n "${IPTV_WAN_DHCP:-}" ] && echo "$IPTV_WAN_DHCP" || echo "true") (options \"$IPTV_WAN_DHCP_OPTIONS\")"
-    if [ -n "${IPTV_WAN_STATIC_IP:-}" ]; then
-        echo "WAN Static IP: $IPTV_WAN_STATIC_IP"
-    fi
-    echo "WAN Ranges: $IPTV_WAN_RANGES"
-    echo "LAN Interfaces: $IPTV_LAN_INTERFACES"
-    echo "IGMP Proxy quickleave disabled: $IPTV_IGMPPROXY_DISABLE_QUICKLEAVE"
-    echo "IGMP Proxy debug: $IPTV_IGMPPROXY_DEBUG"
+	mac=""
+	if [ -n "${IPTV_WAN_VLAN_MAC:-}" ]; then
+		mac=" mac ${IPTV_WAN_VLAN_MAC}"
+	fi
 
-    echo "=== IP Link and Route ==="
-    ip -4 addr show dev "$target" || true
-    ip route show dev "$target" || true
+	dhcp="true"
+	if [ -n "${IPTV_WAN_DHCP:-}" ]; then
+		dhcp="${IPTV_WAN_DHCP}"
+	fi
 
-    echo "=== Service Logs ==="
-    journalctl -u udm-iptv | tail
+	echo "Please share the following output with the developers:"
+	echo "=== Configuration ==="
+	echo "WAN Interface: ${IPTV_WAN_INTERFACE}"
+	echo "WAN VLAN: ${IPTV_WAN_VLAN} (dev ${IPTV_WAN_VLAN_INTERFACE}${mac})"
+	echo "WAN DHCP: ${dhcp} (options \"${IPTV_WAN_DHCP_OPTIONS}\")"
+	if [ -n "${IPTV_WAN_STATIC_IP:-}" ]; then
+		echo "WAN Static IP: ${IPTV_WAN_STATIC_IP}"
+	fi
+	echo "WAN Ranges: ${IPTV_WAN_RANGES}"
+	echo "LAN Interfaces: ${IPTV_LAN_INTERFACES}"
+	echo "IGMP Proxy quickleave disabled: ${IPTV_IGMPPROXY_DISABLE_QUICKLEAVE}"
+	echo "IGMP Proxy debug: ${IPTV_IGMPPROXY_DEBUG}"
+
+	echo "=== IP Link and Route ==="
+	ip -4 addr show dev "${target}" || true
+	ip route show dev "${target}" || true
+
+	echo "=== Service Logs ==="
+	journalctl -u udm-iptv | tail
 }
 
 # Print the help message of this program.
-udm_iptv_usage()
-{
-	cat << EOF
+udm_iptv_usage() {
+	cat <<EOF
 Usage: $0 [OPTIONS...] COMMAND [ARGS]...
 Helper tool for routed IPTV on the UniFi Dream Machine (Pro/SE).
 Commands:
   configure         Re-configure the udm-iptv installation
   upgrade           Upgrade the udm-iptv installation to the latest version
+  persist           Save the configuration for use after a firmware update
+  restore           Reinstall udm-iptv from the saved configuration
   uninstall         Remove udm-iptv from the system
   restart           Restart the udm-iptv daemon
   diagnose          Diagnose issues with the current configuration
@@ -94,37 +354,45 @@ EOF
 
 # Check if the user passed any argument
 if [ $# -eq 0 ]; then
-    udm_iptv_usage
-    exit 1
+	udm_iptv_usage
+	exit 1
 fi
 
 case $1 in
-    -h|--help)
-        udm_iptv_usage
-        exit 0
-        ;;
-    configure|reconfigure)
-        shift
-        udm_iptv_configure "$@"
-        ;;
-    upgrade)
-        shift
-        udm_iptv_upgrade "$@"
-        ;;
-    uninstall)
-        shift
-        udm_iptv_uninstall "$@"
-        ;;
-    restart)
-        shift
-        udm_iptv_restart "$@"
-        ;;
-    diag|diagnose)
-        shift
-        udm_iptv_diagnose "$@"
-        ;;
-    *)
-        udm_iptv_usage
-        exit 1
-        ;;
+-h | --help)
+	udm_iptv_usage
+	exit 0
+	;;
+configure | reconfigure)
+	shift
+	udm_iptv_configure "$@"
+	;;
+upgrade)
+	shift
+	udm_iptv_upgrade "$@"
+	;;
+persist)
+	shift
+	udm_iptv_persist "$@"
+	;;
+restore)
+	shift
+	udm_iptv_restore "$@"
+	;;
+uninstall)
+	shift
+	udm_iptv_uninstall "$@"
+	;;
+restart)
+	shift
+	udm_iptv_restart "$@"
+	;;
+diag | diagnose)
+	shift
+	udm_iptv_diagnose "$@"
+	;;
+*)
+	udm_iptv_usage
+	exit 1
+	;;
 esac

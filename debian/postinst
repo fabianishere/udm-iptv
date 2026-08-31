@@ -7,7 +7,67 @@
 # (at your option) any later version.
 
 # Source debconf library.
+# shellcheck source=/dev/null
 . /usr/share/debconf/confmodule
+
+CONFIGFILE=/etc/udm-iptv.conf
+STATEDIR="${UDM_IPTV_STATE_DIR:-/data/udm-iptv}"
+PROFILEDIR=/usr/lib/udm-iptv/profiles
+PROFILEPENDING=/var/cache/udm-iptv/profile.pending
+
+# Helper used by the custom profile when IPTV is carried on the native VLAN.
+_if_inet_list_upper() {
+    link=$(readlink "$1") || link=
+    if [ -n "${link}" ]; then
+        basename "${link}"
+    fi
+    for path in "$1"/upper_*; do
+        [ -e "${path}" ] || continue
+        _if_inet_list_upper "${path}"
+    done
+}
+
+# A firmware update removes the package but not /data, so a first install that
+# finds saved answers is a restore rather than a new configuration. The answers
+# are applied through the open debconf session, since dpkg holds its database
+# for the duration of this script. Descriptor 3 belongs to confmodule.
+if [ "$1" = "configure" ] && [ -z "${2:-}" ] && [ -e "${STATEDIR}/debconf.preseed" ]; then
+    while read -r _ question _ value <&7; do
+        [ -n "${question}" ] || continue
+        db_set "${question}" "${value}" || true
+    done 7< "${STATEDIR}/debconf.preseed"
+
+    if [ -e "${STATEDIR}/udm-iptv.conf" ]; then
+        cp "${STATEDIR}/udm-iptv.conf" "${CONFIGFILE}"
+        chmod 600 "${CONFIGFILE}"
+    fi
+
+    echo "Restored the configuration saved in ${STATEDIR}."
+    restored=yes
+    rm -f "${PROFILEPENDING}"
+fi
+
+# On a first install, dpkg runs the debconf config script before unpacking the
+# package, so the selected profile is not available yet. Apply the deferred
+# profile now that the package payload exists, before generating the config.
+if [ "$1" = "configure" ] && [ -z "${restored:-}" ] && [ -r "${PROFILEPENDING}" ]; then
+    read -r profile_id < "${PROFILEPENDING}" || profile_id=
+    case "${profile_id}" in
+        ""|*[!a-z0-9_-]*)
+            echo "Invalid deferred profile: ${profile_id}" >&2
+            exit 2
+            ;;
+        *) ;;
+    esac
+    profile="${PROFILEDIR}/${profile_id}.profile"
+    if [ ! -r "${profile}" ]; then
+        echo "Deferred profile is unavailable: ${profile}" >&2
+        exit 2
+    fi
+    # shellcheck source=profiles/custom.profile
+    . "${profile}"
+    rm -f "${PROFILEPENDING}"
+fi
 
 # Substitute a debconf answer into a configuration file with the syntax of
 # /etc/udm-iptv.conf
@@ -15,12 +75,12 @@ replace_conf() {
     file="$1"
     setting="$2"
     value="$3";
-    if grep -q "^${setting}=" "$file"; then
-        value="$(echo "$value" | sed -e 's,[\@],\\&,g')"
-        sed -i -re "s@^(${setting}=).*@\1\"${value}\"@" "$file"
+    if grep -q "^${setting}=" "${file}"; then
+        value="$(echo "${value}" | sed -e 's,[\@],\\&,g')"
+        sed -i -re "s@^(${setting}=).*@\1\"${value}\"@" "${file}"
     else
-        echo >> "$file"
-        echo "${setting}=\"${value}\"" >> "$file"
+        echo >> "${file}"
+        echo "${setting}=\"${value}\"" >> "${file}"
     fi
 }
 
@@ -29,75 +89,99 @@ replace_conf() {
 remove_conf() {
     file="$1"
     setting="$2"
-    if grep -q "^${setting}=" "$file"; then
-        sed -i -re "/^${setting}=.*$/d" "$file"
+    if grep -q "^${setting}=" "${file}"; then
+        sed -i -re "/^${setting}=.*$/d" "${file}"
     fi
 }
 
-CONFIGFILE=/etc/udm-iptv.conf
 tmpconf=$(mktemp -t iptv.XXXX.conf)
 
 # Copy original configuration into temp file
-cp "$CONFIGFILE" "$tmpconf" || true
+cp "${CONFIGFILE}" "${tmpconf}" || true
 
 db_get udm-iptv/wan-interface
-replace_conf "$tmpconf" "IPTV_WAN_INTERFACE" "$RET"
+replace_conf "${tmpconf}" "IPTV_WAN_INTERFACE" "${RET}"
 
 db_get udm-iptv/wan-vlan
-replace_conf "$tmpconf" "IPTV_WAN_VLAN" "$RET"
+replace_conf "${tmpconf}" "IPTV_WAN_VLAN" "${RET}"
 
 db_get udm-iptv/wan-vlan-interface
-replace_conf "$tmpconf" "IPTV_WAN_VLAN_INTERFACE" "$RET"
+replace_conf "${tmpconf}" "IPTV_WAN_VLAN_INTERFACE" "${RET}"
 
 db_get udm-iptv/wan-vlan-mac
-if [ -n "$RET" ]; then
-    replace_conf "$tmpconf" "IPTV_WAN_VLAN_MAC" "$RET"
+if [ -n "${RET}" ]; then
+    replace_conf "${tmpconf}" "IPTV_WAN_VLAN_MAC" "${RET}"
 else
-    remove_conf "$tmpconf" "IPTV_WAN_VLAN_MAC"
+    remove_conf "${tmpconf}" "IPTV_WAN_VLAN_MAC"
 fi
 
 db_get udm-iptv/wan-ranges
-replace_conf "$tmpconf" "IPTV_WAN_RANGES" "$(echo "$RET" | tr ',' ' ')"
+ranges=$(echo "${RET}" | tr ',' ' ')
+replace_conf "${tmpconf}" "IPTV_WAN_RANGES" "${ranges}"
 
 db_get udm-iptv/wan-dhcp
-if [ "$RET" = "false" ]; then
-    replace_conf "$tmpconf" "IPTV_WAN_DHCP" "$RET"
+if [ "${RET}" = "false" ]; then
+    replace_conf "${tmpconf}" "IPTV_WAN_DHCP" "${RET}"
 else
-    remove_conf "$tmpconf" "IPTV_WAN_DHCP"
+    remove_conf "${tmpconf}" "IPTV_WAN_DHCP"
 fi
 
 db_get udm-iptv/wan-dhcp-options
-replace_conf "$tmpconf" "IPTV_WAN_DHCP_OPTIONS" "$RET"
+replace_conf "${tmpconf}" "IPTV_WAN_DHCP_OPTIONS" "${RET}"
 
 db_get udm-iptv/wan-static-ip
-if [ -n "$RET" ]; then
-    replace_conf "$tmpconf" "IPTV_WAN_STATIC_IP" "$RET"
+if [ -n "${RET}" ]; then
+    replace_conf "${tmpconf}" "IPTV_WAN_STATIC_IP" "${RET}"
 else
-    remove_conf "$tmpconf" "IPTV_WAN_STATIC_IP"
+    remove_conf "${tmpconf}" "IPTV_WAN_STATIC_IP"
 fi
 
 db_get udm-iptv/lan-interfaces
-replace_conf "$tmpconf" "IPTV_LAN_INTERFACES" "$(echo "$RET" | tr ',' ' ')"
+interfaces=$(echo "${RET}" | tr ',' ' ')
+replace_conf "${tmpconf}" "IPTV_LAN_INTERFACES" "${interfaces}"
 
 
 db_get udm-iptv/igmpproxy-program
-replace_conf "$tmpconf" "IPTV_IGMPPROXY_PROGRAM" "$RET"
+replace_conf "${tmpconf}" "IPTV_IGMPPROXY_PROGRAM" "${RET}"
 
 db_get udm-iptv/igmpproxy-quickleave
 value="false"
-if [ "$RET" = "false" ]; then
+if [ "${RET}" = "false" ]; then
     value="true"
 fi
-replace_conf "$tmpconf" "IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" "$value"
+replace_conf "${tmpconf}" "IPTV_IGMPPROXY_DISABLE_QUICKLEAVE" "${value}"
 
 db_get udm-iptv/igmpproxy-debug
-replace_conf "$tmpconf" "IPTV_IGMPPROXY_DEBUG" "$RET"
+replace_conf "${tmpconf}" "IPTV_IGMPPROXY_DEBUG" "${RET}"
 
 db_get udm-iptv/igmpproxy-igmp-version
-replace_conf "$tmpconf" "IPTV_IGMPPROXY_IGMP_VERSION" "$RET"
+replace_conf "${tmpconf}" "IPTV_IGMPPROXY_IGMP_VERSION" "${RET}"
 
 # Replace file with updated configuration
-mv "$tmpconf" "$(readlink -f "$CONFIGFILE")"
+target=$(readlink -f "${CONFIGFILE}")
+mv "${tmpconf}" "${target}"
+
+# Nothing new needs saving when the answers just came out of the saved copy.
+# During a normal install, the active debconf transaction is not committed until
+# this maintainer script exits, so pass its current answers directly to persist.
+if [ -d /data ] && [ -z "${restored:-}" ]; then
+    questions=$(mktemp -t iptv.XXXX.questions)
+    values=$(mktemp -t iptv.XXXX.values)
+    awk '/^Name: udm-iptv/ { print $2 }' /var/cache/debconf/templates.dat > "${questions}"
+    while read -r question <&8; do
+        db_get "${question}"
+        printf '%s\t%s\n' "${question}" "${RET}" >> "${values}"
+    done 8< "${questions}"
+    UDM_IPTV_DEBCONF_VALUES="${values}" /usr/bin/udm-iptv persist || true
+    rm -f "${questions}" "${values}"
+    db_stop
+fi
+
+# dh_installsystemd only manages units below /lib, and the unit that has to
+# survive a firmware update lives in /etc.
+if [ -d /run/systemd/system ]; then
+    systemctl enable udm-iptv-restore.service > /dev/null 2>&1 || true
+fi
 
 #DEBHELPER#
 

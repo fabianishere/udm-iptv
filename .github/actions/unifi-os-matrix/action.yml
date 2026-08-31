@@ -1,0 +1,31 @@
+---
+name: Generate UniFi OS firmware matrix
+description: Select the two newest firmware releases available when a pull request was opened
+inputs:
+  cutoff:
+    description: Only include firmware published before this ISO 8601 timestamp
+    required: false
+    default: ""
+  sku:
+    description: Device model to select, or all
+    required: true
+  image:
+    description: Container image repository used for firmware image tags
+    required: true
+outputs:
+  matrix:
+    description: JSON array for strategy.matrix.include
+    value: ${{ steps.matrix.outputs.matrix }}
+runs:
+  using: composite
+  steps:
+    - id: matrix
+      shell: bash
+      env:
+        CUTOFF: ${{ inputs.cutoff }}
+        SKU: ${{ inputs.sku }}
+        UNIFI_OS_IMAGE: ${{ inputs.image }}
+      run: |
+        matrix=$("${GITHUB_ACTION_PATH}/matrix.bash")
+        jq . <<<"${matrix}"
+        echo "matrix=${matrix}" >> "${GITHUB_OUTPUT}"

@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# shellcheck disable=SC2154 # RET is set by db_get.
 # Script to configure custom profile
 #
 # Copyright (C) 2022 Fabian Mastenbroek.
@@ -10,7 +11,7 @@
 
 P_STATE=1
 while true; do
-    case "$P_STATE" in
+    case "${P_STATE}" in
     0)  # Ensure going back from initial step is harmless
         P_STATE=1
         continue
@@ -20,19 +21,20 @@ while true; do
         ;;
     2)  # If IPTV traffic is carried over a separate VLAN, ask which ID
         db_get udm-iptv/wan-vlan-separate
-        if [ "$RET" = false ]; then
+        if [ "${RET}" = false ]; then
             # IPTV traffic is on native VLAN
             db_set udm-iptv/wan-vlan 0
             # Disable DHCP by default
             db_set udm-iptv/wan-dhcp false
 
             db_get udm-iptv/wan-port
-            db_subst udm-iptv/wan-interface choices "$(_if_inet_list_upper "/sys/class/net/$RET" | sed ':a;N;s/\n/, /;ba')"
+            wan_choices=$(_if_inet_list_upper "/sys/class/net/${RET}" | sed ':a;N;s/\n/, /;ba')
+            db_subst udm-iptv/wan-interface choices "${wan_choices}"
             db_input high udm-iptv/wan-interface || true
         else
             # WAN port is same as WAN interface
             db_get udm-iptv/wan-port
-            db_set udm-iptv/wan-interface "$RET"
+            db_set udm-iptv/wan-interface "${RET}"
 
             # Enable DHCP by default
             db_set udm-iptv/wan-dhcp true
@@ -43,7 +45,7 @@ while true; do
         ;;
     3)
         db_get udm-iptv/wan-vlan-separate
-        if [ "$RET" = true ]; then
+        if [ "${RET}" = true ]; then
             # Configure VLAN interface name
             db_input low udm-iptv/wan-vlan-interface || true
         fi
@@ -59,7 +61,7 @@ while true; do
         ;;
     7)  # Configure DHCP options
         db_get udm-iptv/wan-dhcp
-        if [ "$RET" = true ]; then
+        if [ "${RET}" = true ]; then
             db_set udm-iptv/wan-static-ip ""
             db_input high udm-iptv/wan-dhcp-options || true
         else
@@ -70,7 +72,7 @@ while true; do
         break
         ;;
     *)  # unknown state
-        echo "Unknown configuration state: $STATE" >&2
+        echo "Unknown configuration state: ${P_STATE}" >&2
         exit 2
         ;;
     esac

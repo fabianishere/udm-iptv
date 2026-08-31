@@ -1,0 +1,5 @@
+[Unit]
+Description=Minimal target for udm-iptv integration tests
+DefaultDependencies=no
+Requires=systemd-journald.service
+After=systemd-journald.service

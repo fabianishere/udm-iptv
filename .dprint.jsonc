@@ -1,0 +1,16 @@
+{
+	"$schema": "https://dprint.dev/schemas/v0.json",
+	"useTabs": true,
+	"json": {},
+	"markdown": { "emphasisKind": "asterisks", "lineWidth": 100, "textWrap": "maintain" },
+	"shfmt": { "useTabs": true, "binaryNextLine": true, "switchCaseIndent": true },
+	"ruff": {},
+	"yaml": { "printWidth": 160 },
+	"plugins": [
+		"https://plugins.dprint.dev/kjanat/shfmt-1.0.0.wasm",
+		"npm:@dprint/json@0.23.0",
+		"npm:@dprint/markdown@0.23.2",
+		"npm:@dprint/ruff@0.8.5",
+		"npm:dprint-plugin-yaml@0.6.0",
+	],
+}

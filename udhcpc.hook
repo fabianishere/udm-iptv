@@ -21,89 +21,93 @@ if ! command -v ip > /dev/null 2>&1; then
     alias ip="busybox ip"
 fi
 
-run_scripts() {
-    local dir=$1
-    if [ -d $dir ]; then
-        for i in $dir/*; do
-            [ -f $i ] && $i
-        done
-    fi
-}
-
 deconfig() {
-    ip -4 addr flush dev "$interface"
+    ip -4 addr flush dev "${interface}"
 }
 
 if_index() {
-    if [ -e /sys/class/net/"$interface"/ifindex ]; then
-        cat /sys/class/net/"$interface"/ifindex
+    if [ -e /sys/class/net/"${interface}"/ifindex ]; then
+        cat /sys/class/net/"${interface}"/ifindex
     else
-        ip -4 link show dev "$interface" | head -n1 | cut -d: -f1
+        ip -4 link show dev "${interface}" | head -n1 | cut -d: -f1
     fi
 }
 
 calc_metric() {
-    echo $((200 + $(if_index)))
+    index=$(if_index)
+    echo $((200 + index))
 }
 
 route_add() {
-    local to=$1 gw=$2 num=$3
+    add_to="$1"
+    add_gw="$2"
+    add_num="$3"
+
+    add_metric="${IF_METRIC:-}"
+    if [ -z "${add_metric}" ]; then
+        add_metric=$(calc_metric)
+    fi
+
     # special case for /32 subnets:
     # /32 instructs kernel to always use routing for all outgoing packets
     # (they can never be sent to local subnet - there is no local subnet for /32).
     # Used in datacenters, avoids the need for private ip-addresses between two hops.
-    if [ "$subnet" = "255.255.255.255" ]; then
-        ip -4 route add $gw dev $interface
+    if [ "${subnet}" = "255.255.255.255" ]; then
+        ip -4 route add "${add_gw}" dev "${interface}"
     fi
-    ip -4 route add $to via $gw dev $interface \
-        metric $(($num + ${IF_METRIC:-$(calc_metric)}))
+    ip -4 route add "${add_to}" via "${add_gw}" dev "${interface}" \
+        metric $((add_num + add_metric))
 }
 
 routes() {
-    [ -z "$router" ] && [ -z "$staticroutes" ] && return
-    for i in $NO_GATEWAY; do
-        [ "$i" = "$interface" ] && return
+    [ -z "${router}" ] && [ -z "${staticroutes}" ] && return
+    for skip_iface in ${NO_GATEWAY:-}; do
+        [ "${skip_iface}" = "${interface}" ] && return
     done
-    while ip -4 route del default via dev $interface 2>/dev/null; do
+    while ip -4 route del default via dev "${interface}" 2>/dev/null; do
         :
     done
-    local num=0
+    route_index=0
     # RFC3442:
     # If the DHCP server returns both a Classless Static Routes option
     # and a Router option, the DHCP client MUST ignore the Router option.
-    if [ -n "$staticroutes" ]; then
+    if [ -n "${staticroutes}" ]; then
         # static routes format: dest1/mask gw1 ... destn/mask gwn
-        set -- $staticroutes
+        set --
+        for route_field in ${staticroutes}; do
+            set -- "$@" "${route_field}"
+        done
         while [ -n "$1" ] && [ -n "$2" ]; do
-            local dest="$1" gw="$2"
-            if [ "$gw" != "0.0.0.0" ]; then
-                route_add $dest $gw $num && num=$(($num + 1))
+            static_dest="$1"
+            static_gw="$2"
+            if [ "${static_gw}" != "0.0.0.0" ]; then
+                route_add "${static_dest}" "${static_gw}" "${route_index}"
+                route_index=$((route_index + 1))
             fi
             shift 2
         done
     else
-        local gw=
-        for gw in $router; do
-            route_add 0.0.0.0/0 $gw $num && num=$(($num + 1))
+        for default_gw in ${router}; do
+            route_add 0.0.0.0/0 "${default_gw}" "${route_index}"
+            route_index=$((route_index + 1))
         done
     fi
 }
 
 bound() {
-    ip -4 addr add $ip/$mask ${broadcast:+broadcast $broadcast} dev $interface
-    ip -4 link set dev $interface up
+    ip -4 addr add "${ip}"/"${mask}" ${broadcast:+broadcast ${broadcast}} dev "${interface}"
+    ip -4 link set dev "${interface}" up
     routes
 }
 
 renew() {
-    if ! ip -4 addr show dev $interface | grep $ip/$mask; then
-        ip -4 addr flush dev $interface
-        ip -4 addr add $ip/$mask ${broadcast:+broadcast $broadcast} dev $interface
+    if ! ip -4 addr show dev "${interface}" | grep "${ip}"/"${mask}"; then
+        ip -4 addr flush dev "${interface}"
+        ip -4 addr add "${ip}"/"${mask}" ${broadcast:+broadcast ${broadcast}} dev "${interface}"
     fi
 
-    local i
-    for i in $router; do
-        if ! ip -4 route show | grep ^default | grep $i; then
+    for gateway in ${router}; do
+        if ! ip -4 route show | grep ^default | grep "${gateway}"; then
             routes
             break
         fi
@@ -111,8 +115,14 @@ renew() {
 }
 
 case "$1" in
-deconfig | renew | bound)
-    $1
+deconfig)
+    deconfig
+    ;;
+renew)
+    renew
+    ;;
+bound)
+    bound
     ;;
 leasefail)
     echo "udhcpc failed to get a DHCP lease" >&2

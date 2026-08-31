@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# shellcheck disable=SC2154 # RET is set by db_get.
 # Profile for Swisscom (CH)
 #
 # Copyright (C) 2022 Fabian Mastenbroek.
@@ -9,7 +10,7 @@
 # (at your option) any later version.
 
 db_get udm-iptv/wan-port
-db_set udm-iptv/wan-interface "$RET"
+db_set udm-iptv/wan-interface "${RET}"
 
 db_set udm-iptv/wan-vlan 0
 db_set udm-iptv/wan-ranges "195.186.0.0/16, 213.3.72.0/24, 224.0.0.0/4"

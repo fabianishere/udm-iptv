@@ -1,0 +1,15 @@
+[Unit]
+Description=Reinstall udm-iptv after a firmware update
+RequiresMountsFor=/data/udm-iptv
+# A firmware update discards the writable overlay below /usr, so a missing
+# daemon is what distinguishes an updated system from an ordinary boot.
+ConditionPathExists=!/usr/lib/udm-iptv/udm-iptvd
+ConditionPathExists=/data/udm-iptv/udm-iptv-restore
+
+[Service]
+Type=oneshot
+ExecStart=/data/udm-iptv/udm-iptv-restore
+TimeoutStartSec=2400
+
+[Install]
+WantedBy=multi-user.target

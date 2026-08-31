@@ -1,0 +1,27 @@
+---
+name: Validate cached UniFi OS firmware images
+description: Validate pulled firmware images against matrix metadata and tag board aliases
+inputs:
+  image:
+    description: Container image repository
+    required: true
+  model:
+    description: Device model used in image tags
+    required: true
+  firmwares:
+    description: JSON array containing the selected firmware pair
+    required: true
+outputs:
+  cache-needed:
+    description: Whether either firmware image must be restored or built
+    value: ${{ steps.validate.outputs.cache-needed }}
+runs:
+  using: composite
+  steps:
+    - id: validate
+      shell: bash
+      env:
+        UNIFI_OS_IMAGE: ${{ inputs.image }}
+        MODEL: ${{ inputs.model }}
+        UNIFI_OS_FIRMWARES: ${{ inputs.firmwares }}
+      run: '"${GITHUB_ACTION_PATH}/validate.bash"'

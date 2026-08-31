@@ -10,7 +10,7 @@ Homepage: https://github.com/fabianishere/udm-iptv
 
 Package: udm-iptv
 Architecture: all
-Depends: busybox | busybox-static, iproute2, iptables, ${misc:Depends}
+Depends: busybox | busybox-static, iproute2, iptables, psmisc, ${misc:Depends}
 Recommends: improxy
 Suggests: igmpproxy (>= 0.2)
 Section: net
