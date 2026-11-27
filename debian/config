@@ -70,6 +70,7 @@ _list_profiles() {
     echo "meo", "MEO (PT)"
     echo "bt", "BT (GB)"
     echo "telenor", "Telenor (NO)"
+    echo "telia-lt", "Telia (LT)"
     echo "vivo", "Vivo SP (BR)"
     echo "posttv", "PostTV (LU)"
     echo "magentatv", "MagentaTV (DE)"
