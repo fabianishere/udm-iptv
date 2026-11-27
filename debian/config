@@ -70,6 +70,7 @@ _list_profiles() {
     echo "meo", "MEO (PT)"
     echo "bt", "BT (GB)"
     echo "telenor", "Telenor (NO)"
+    echo "telia-lt", "Telia (LT)"
     echo "vivo", "Vivo SP (BR)"
     echo "posttv", "PostTV (LU)"
     echo "magentatv", "MagentaTV (DE)"
@@ -149,7 +150,7 @@ while true; do
                 db_subst udm-iptv/wan-port choices_c "eth18, eth19"
                 db_input high udm-iptv/wan-port || true
                 ;;
-            UXG)
+            UXG|UXMAX)
                 db_set udm-iptv/wan-port eth1
                 ;;
             UDRULT)
@@ -157,7 +158,7 @@ while true; do
                 db_subst udm-iptv/wan-port choices_c "eth4, eth3"
                 db_input high udm-iptv/wan-port || true
                 ;;
-            UCGF)
+            UCGF|UXGA6AA)
                 db_subst udm-iptv/wan-port choices "Port 7 (WAN SFP+), Port 5 (WAN 10 GbE)"
                 db_subst udm-iptv/wan-port choices_c "eth6, eth4"
                 db_input high udm-iptv/wan-port || true
@@ -165,6 +166,11 @@ while true; do
             UXGB|UCGMAX)
                 db_subst udm-iptv/wan-port choices "WAN (2.5 GbE), LAN 4 (2.5 GbE)"
                 db_subst udm-iptv/wan-port choices_c "eth4, eth3"
+                db_input high udm-iptv/wan-port || true
+                ;;
+            UCGINDUSTRIAL)
+                db_subst udm-iptv/wan-port choices "Port 5 (10 GbE), Port 6 (SFP+)"
+                db_subst udm-iptv/wan-port choices_c "eth4, eth5"
                 db_input high udm-iptv/wan-port || true
                 ;;
             *)
@@ -179,7 +185,16 @@ while true; do
         ;;
     3)  # Perform profile configuration
         db_get udm-iptv/profile
-        . /usr/lib/udm-iptv/profiles/"$RET".profile
+        profile=/usr/lib/udm-iptv/profiles/"$RET".profile
+        if ! [ -e "$profile" ]; then
+            # This script may be run by dpkg-preconfigure before the package
+            # is unpacked, in which case the profiles are not yet available.
+            # Stop here; the script is run again from postinst once the
+            # files are in place.
+            exit 0
+        fi
+        # shellcheck disable=SC1090
+        . "$profile"
         ;;
     4)  # Select LAN interfaces
         case "$board" in
