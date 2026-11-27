@@ -59,6 +59,9 @@ fi
 db_get udm-iptv/wan-ranges
 replace_conf "$tmpconf" "IPTV_WAN_RANGES" "$(echo "$RET" | tr ',' ' ')"
 
+db_get udm-iptv/wan-ranges-gw-dest
+replace_conf "$tmpconf" "IPTV_WAN_RANGES_GW_DEST" "$RET"
+
 db_get udm-iptv/wan-dhcp
 if [ "$RET" = "false" ]; then
     replace_conf "$tmpconf" "IPTV_WAN_DHCP" "$RET"
